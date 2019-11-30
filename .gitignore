@@ -90,3 +90,6 @@ local_settings.py
 
 .env
 db.sqlite3
+
+# WordPress dump
+wordpress_dump.xml
