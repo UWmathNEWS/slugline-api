@@ -27,7 +27,7 @@ class Article(models.Model):
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
 
-    issue = models.ForeignKey(Issue)
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
     def render_to_html(self):
         """Returns this article converted to HTML for web display.
