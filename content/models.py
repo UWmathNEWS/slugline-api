@@ -10,13 +10,13 @@ class Issue(models.Model):
     volume_num = models.IntegerField()
 
     def short_name(self):
-        return f'v{self.issue_num}i{self.volume_num}'
+        return f'v{self.volume_num}i{self.issue_num}'
 
     def long_name(self):
-        return f'Issue {self.issue_num} Volume {self.volume_num}'
+        return f'Volume {self.volume_num} Issue {self.issue_num} '
 
     def __str__(self):
-        return 'Issue ' + 'v' + str(self.issue_num) + 'i' + str(self.volume_num)
+        return self.short_name()
 
 class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
