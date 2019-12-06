@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib import admin
+
+from django.utils.html import strip_tags
 
 class Issue(models.Model):
     """An issue of the publication.
@@ -40,8 +43,12 @@ class Article(models.Model):
         """
         raise NotImplementedError('render_to_xml not implemented')
 
+    def __str__(self):
+        return f'{self.title} by {self.author}'
+
     class Meta:
         abstract = True
+
 
 class WordpressArticle(Article):
     """An article imported from the Wordpress dump. Some fields may be missing.
@@ -50,4 +57,18 @@ class WordpressArticle(Article):
     """This is raw HTML extracted from the Wordpress dump."""
     content_html = models.TextField()
 
+    def parse_wordpress_html(self, content):
+        """Reads in raw HTML from a Wordpress dump and does some
+        post-processing to add paragraph breaks and attempt to 
+        extract the author name
+        """
+        paragraphs = content.split('\n')
+        # This is ghetto, but should be fine
+        self.author = strip_tags(paragraphs[-1])
+        for idx, paragraph in enumerate(paragraphs):
+            paragraph + '<p>' + paragraph + '</p>'
+            paragraphs[idx] = paragraph
+        self.content_html = '\n'.join(paragraphs)
     
+admin.site.register(Issue)
+admin.site.register(WordpressArticle)
