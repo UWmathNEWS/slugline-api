@@ -17,9 +17,10 @@ from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render
 
+import common.views
 
 urlpatterns = [
-    path('', lambda request: render(request, 'home.html')),
+    path('', common.views.HomeView.as_view()),
 
     path('admin/', admin.site.urls),
 ]
