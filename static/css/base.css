@@ -22,13 +22,10 @@
     text-decoration: none;
 }
 
-.header-info {
-    align-content: flex-end;
-}
-
 .header-info > h3 {
     text-align: right;
     line-height: 0.25em;
+    font-weight: normal;
 }
 
 .header-info > h3:first-child {
