@@ -17,7 +17,6 @@
 }
 
 .mathnews-brand {
-    color: var(--theme-color);
     margin: 0em;
     font-size: 5em;
     text-decoration: none;
@@ -37,6 +36,7 @@
 }
 
 .slugline-nav {
+    color: var(--theme-color);
     padding: 0.25em;
     display: flex;
     justify-content: space-around;
@@ -46,7 +46,6 @@
 }
 
 .slugline-nav > a {
-    color: var(--theme-color);
     font-family: DIN Next;
     font-size: 1.25em;
     margin-top: 0.15em;
