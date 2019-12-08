@@ -11,7 +11,6 @@
 }
 
 /* Background color, look into changing this dynamically? */
-
 :root {
     --theme-color: #a05ad4;
 }
@@ -40,6 +39,12 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
     font-family: Joanna Nova;
+}
+
+/* Disable automatic link styles */
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
 /* The classic post-article horizontal line */
