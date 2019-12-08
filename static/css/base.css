@@ -13,21 +13,14 @@
     margin-bottom: 1em;
     padding: 1em;
     background: black;
+    color: var(--theme-color)
 }
 
-.mathnews-logo {
+.mathnews-brand {
     color: var(--theme-color);
     margin: 0em;
     font-size: 5em;
-}
-
-.mathnews-logo > span:nth-child(1) {
-    font-family: Joanna Nova;
-}
-
-.mathnews-logo > span:nth-child(2) {
-    font-family: DIN Next;
-    font-weight: bold;
+    text-decoration: none;
 }
 
 .header-info {
@@ -35,11 +28,8 @@
 }
 
 .header-info > h3 {
-    color: var(--theme-color);
-    font-family: DIN Next;
     text-align: right;
     line-height: 0.25em;
-    text-transform: uppercase;
 }
 
 .header-info > h3:first-child {

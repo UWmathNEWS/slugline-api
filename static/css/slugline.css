@@ -16,6 +16,17 @@
     --theme-color: #a05ad4;
 }
 
+/* Convenient class for mathnews logo */
+.mathnews-logo::before {
+    content: "math";
+    font-family: Joanna Nova;
+}
+
+.mathnews-logo::after {
+    content: "NEWS";
+    font-family: DIN Next;
+}
+
 /* Set a themed background */
 html {
     background-color: var(--theme-color);
@@ -24,6 +35,7 @@ html {
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
     font-family: DIN Next;
+    text-transform: uppercase;
 }
 
 p {
