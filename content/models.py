@@ -3,14 +3,21 @@ from django.contrib import admin
 
 from django.utils.html import strip_tags
 
+class IssueManager(models.Manager):
+
+    def latest_issue(self):
+        return self.order_by('-volume_num', '-issue_num')[0]
+
 class Issue(models.Model):
     """An issue of the publication.
     """
 
+    objects = IssueManager()
+
     publish_date = models.DateField(null=True)
 
-    issue_num = models.IntegerField()
     volume_num = models.IntegerField()
+    issue_num = models.IntegerField()
 
     def short_name(self):
         return f'v{self.volume_num}i{self.issue_num}'
