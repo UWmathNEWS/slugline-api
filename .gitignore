@@ -93,3 +93,6 @@ db.sqlite3
 
 # WordPress dump
 wordpress_dump.xml
+
+# Fonts, which we can't redistribute
+static/fonts/

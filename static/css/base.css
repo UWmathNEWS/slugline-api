@@ -1,0 +1,64 @@
+.slugline-content {
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.slugline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 1em;
+    background: black;
+}
+
+.mathnews-logo {
+    color: var(--theme-color);
+    margin: 0em;
+    font-size: 5em;
+}
+
+.mathnews-logo > span:nth-child(1) {
+    font-family: Joanna Nova;
+}
+
+.mathnews-logo > span:nth-child(2) {
+    font-family: DIN Next;
+    font-weight: bold;
+}
+
+.header-info {
+    align-content: flex-end;
+}
+
+.header-info > h3 {
+    color: var(--theme-color);
+    font-family: DIN Next;
+    text-align: right;
+    line-height: 0.25em;
+    text-transform: uppercase;
+}
+
+.header-info > h3:first-child {
+    font-size: 2em;
+}
+
+.slugline-nav {
+    padding: 0.25em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    background-color: black;
+}
+
+.slugline-nav > a {
+    color: var(--theme-color);
+    font-family: DIN Next;
+    font-size: 1.25em;
+
+    text-transform: uppercase;
+}

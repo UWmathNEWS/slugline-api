@@ -1,0 +1,34 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{% static 'css/slugline.css' %}">
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        {% block css %}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="slugline-content">
+            <div class="slugline-header">
+                <div class="mathnews-logo">
+                    <span>math</span><span>NEWS</span>
+                </div>
+                <div class="header-info">
+                    <h3>VOLUME 142 · ISSUE 1</h3>
+                    <h3>{% now 'F j, Y' %}</h3>
+                </div>
+            </div>
+            <div class="slugline-nav">
+                <a>ISSUES</a>
+                <a>OTHER THINGS</a>
+                <a>SUBMIT AN ARTICLE</a>
+                <a>LOGIN</a>
+            </div>
+            {% block content %}
+            {% endblock %}
+        </div>
+        {% block js %}
+        {% endblock %}
+    </body>
+</html>
