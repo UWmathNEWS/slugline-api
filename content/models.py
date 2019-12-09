@@ -6,7 +6,7 @@ from django.utils.html import strip_tags
 class IssueManager(models.Manager):
 
     def latest_issue(self):
-        return self.order_by('-volume_num', '-issue_num')[0]
+        return self.all().first()
 
 class Issue(models.Model):
     """An issue of the publication.
@@ -27,6 +27,10 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.short_name()
+
+    class Meta:
+
+        ordering = ['-volume_num', '-issue_num']
 
 class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
