@@ -1,12 +1,11 @@
 .issue-list {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 
     padding: 1em;
 }
 
 .issue-preview {
-    flex: 1 1 auto;
     padding: 1em;
     text-align: center;
 }
@@ -16,4 +15,6 @@
     margin-right: auto;
     max-height: 30vh;
     max-width: 100%;
+
+    margin-bottom: 0.5em;
 }
