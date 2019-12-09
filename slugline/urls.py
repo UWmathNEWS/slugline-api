@@ -18,9 +18,12 @@ from django.urls import path
 from django.shortcuts import render
 
 import common.views
+import content.views
 
 urlpatterns = [
     path('', common.views.HomeView.as_view()),
+
+    path('issues/', content.views.IssuesList.as_view()),
 
     path('admin/', admin.site.urls),
 ]

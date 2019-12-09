@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/content/issue_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Issues</h1>
+<p>Oh, we've got issues.</p>
+{% for volume in issue_volumes %}
+    <div class="volume">
+        <div class="volume-header blackbox">
+            <h3>Volume {{ volume.0.volume_num }}</h3>
+        </div>
+        <div class="issue-list">
+            {% for issue in volume %}
+            <div class="issue-preview">
+                <img src="https://i.kym-cdn.com/entries/icons/original/000/016/212/manning.png">
+                <h3>Issue {{ issue.issue_num }}</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
