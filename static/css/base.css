@@ -8,12 +8,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    margin-top: 1em;
-    margin-bottom: 1em;
-    padding: 1em;
-    background: black;
-    color: var(--theme-color)
 }
 
 .mathnews-brand {
@@ -33,13 +27,10 @@
 }
 
 .slugline-nav {
-    color: var(--theme-color);
-    padding: 0.25em;
     display: flex;
     justify-content: space-around;
     align-items: center;
-
-    background-color: black;
+    padding: 0.25em;
 }
 
 .slugline-nav > a {
