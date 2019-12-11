@@ -1,5 +1,6 @@
 .issue-list {
     display: flex;
+    justify-content: space-evenly;
 
     flex-wrap: wrap;
 
@@ -15,6 +16,8 @@
     margin-left: auto;
     margin-right: auto;
     height: 50vh;
+
+    border: 3px solid black;
 
     margin-bottom: 0.5em;
 }
