@@ -13,3 +13,10 @@ class BaseView(TemplateView):
 class HomeView(BaseView):
 
     template_name = 'home.html'
+
+
+def page_not_found(request, exception):
+    response = render(request, 'not_found.html', 
+        context={ 'latest_issue': Issue.objects.latest_issue()})
+    response.status_code = 404
+    return response
