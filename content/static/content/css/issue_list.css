@@ -1,7 +1,7 @@
 .issue-list {
     display: flex;
 
-    overflow-x: scroll;
+    flex-wrap: wrap;
 
     padding: 1em;
 }
