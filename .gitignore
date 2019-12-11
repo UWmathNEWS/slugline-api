@@ -96,3 +96,7 @@ wordpress_dump.xml
 
 # Fonts, which we can't redistribute
 static/fonts/
+
+
+# Media files
+media/
