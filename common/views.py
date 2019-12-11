@@ -12,7 +12,7 @@ class BaseView(TemplateView):
 
 class HomeView(BaseView):
 
-    template_name = 'home.html'
+    template_name = 'common/home.html'
 
 
 def page_not_found(request, exception):
