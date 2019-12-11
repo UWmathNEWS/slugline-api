@@ -63,10 +63,6 @@ class Article(models.Model):
     def __str__(self):
         return f'{self.title} by {self.author}'
 
-    class Meta:
-        abstract = True
-
-
 class WordpressArticle(Article):
     """An article imported from the Wordpress dump. Some fields may be missing.
     """

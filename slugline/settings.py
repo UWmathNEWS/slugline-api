@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'common',
     'content',
+    'user'
 ]
 
 MIDDLEWARE = [
@@ -101,6 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'user.SluglineUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
