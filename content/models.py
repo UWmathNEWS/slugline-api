@@ -45,6 +45,10 @@ class Article(models.Model):
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
+    is_article_of_issue = models.BooleanField()
+    """Do we want this article to be featured on the issue page?"""
+    is_promo = models.BooleanField()
+
     def render_to_html(self):
         """Returns this article converted to HTML for web display.
         """
