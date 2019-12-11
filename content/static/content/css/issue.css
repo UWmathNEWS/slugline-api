@@ -7,6 +7,12 @@
 
 .issue-pdf {
     flex: 2 2 auto;
+    margin-right: 1em;
+}
+
+.issue-pdf > object {
+    width: 100%;
+    height: 90vh;
 }
 
 .issue-cover {
@@ -17,7 +23,7 @@
 }
 
 .issue-featured {
-    flex: 1 1 auto;
+    flex: 1 0 auto;
 
     display: flex;
     flex-direction: column;

@@ -11,7 +11,12 @@
 <hr>
 <div class="issue-body">
     <div class="issue-pdf">
-        <img class="issue-cover" src="{% static 'content/img/cover_unknown.png' %}">
+        {% if issue.pdf %}
+            <object data="{{ issue.pdf.url }}" type="application/pdf"></object>
+        {% else %}
+            <h1>Oops, there's no PDF for this issue yet.</h1>
+            <p>Maybe bug an editor about it.</p>
+        {% endif %}
     </div>
     <div class="issue-featured">
         <h1>In this issue:</h1>
