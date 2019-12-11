@@ -17,7 +17,7 @@
         <div class="issue-list">
             {% for issue in volume %}
             <a href="/issues/{{ issue.volume_num }}/{{ issue.issue_num }}" class="issue-preview">
-                <img src="https://i.kym-cdn.com/entries/icons/original/000/016/212/manning.png">
+                <img src="{% static 'content/img/cover_unknown.png' %}">
                 <h3>Issue {{ issue.issue_num }}</h3>
             </a>
             {% endfor %}
