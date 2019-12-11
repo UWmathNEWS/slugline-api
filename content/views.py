@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
+from django.http import Http404
+
 
 from common.views import BaseView
 from content.models import Issue
@@ -36,5 +38,8 @@ class IssueView(BaseView):
         ctx = super().get_context_data(**kwargs)
         volume = kwargs['volume']
         issue = kwargs['issue']
-        ctx['issue'] = Issue.objects.get(volume_num=volume, issue_num=issue)
+        try:
+            ctx['issue'] = Issue.objects.get(volume_num=volume, issue_num=issue)
+        except Issue.DoesNotExist:
+            raise Http404
         return ctx
