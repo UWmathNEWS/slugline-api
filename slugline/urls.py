@@ -24,6 +24,7 @@ urlpatterns = [
     path('', common.views.HomeView.as_view()),
 
     path('issues/', content.views.IssuesList.as_view()),
+    path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view()),
 
     path('admin/', admin.site.urls),
 ]

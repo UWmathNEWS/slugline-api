@@ -1,0 +1,23 @@
+{% extends 'common/base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'content/css/issue.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>{{ issue.long_name }}</h1>
+<hr>
+<div class="issue-body">
+    <div class="issue-pdf">
+        <img class="issue-cover" src="{% static 'content/img/cover_unknown.png' %}">
+    </div>
+    <div class="issue-featured">
+        <h1>In this issue:</h1>
+        <h3>ARTICLE 1</h3>
+        <h3>ARTICLE 2</h3>
+        <h3>ARTICLE 3</h3>
+    </div>
+</div>
+{% endblock %}

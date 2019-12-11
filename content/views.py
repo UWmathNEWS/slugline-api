@@ -28,3 +28,13 @@ class IssuesList(BaseView):
         ctx['issue_volumes'] = self.get_issues_sorted()       
         return ctx
 
+class IssueView(BaseView):
+
+    template_name = 'content/issue.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        volume = kwargs['volume']
+        issue = kwargs['issue']
+        ctx['issue'] = Issue.objects.get(volume_num=volume, issue_num=issue)
+        return ctx

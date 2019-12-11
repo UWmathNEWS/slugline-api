@@ -1,0 +1,24 @@
+.issue-body {
+    display: flex;
+    align-items: flex-start;
+
+    margin-top: 1em;
+}
+
+.issue-pdf {
+    flex: 2 2 auto;
+}
+
+.issue-cover {
+    width: 75%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.issue-featured {
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: column;
+}
