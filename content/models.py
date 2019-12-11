@@ -19,6 +19,8 @@ class Issue(models.Model):
     volume_num = models.IntegerField()
     issue_num = models.IntegerField()
 
+    pdf = models.FileField(upload_to='issue_pdfs/', null=True)
+
     def short_name(self):
         return f'v{self.volume_num}i{self.issue_num}'
 
