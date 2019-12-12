@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 import re
 import xml.etree.ElementTree as ETree
 
-from content.models import Issue, WordpressArticle
+from content.models import Issue, Article
 
 """A dictionary of XML namespaces the dump uses.
 """
@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Delete existing Wordpress articles
-        WordpressArticle.objects.all().delete()
+        Article.objects.filter(is_wordpress=True).delete()
         file_name = options['dump_file']
         tree = ETree.parse(file_name)
         article_tags = tree.findall('.//item')
@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 issue_num=issue_num,
                 volume_num=volume_num
             )
-            article = WordpressArticle(
+            article = Article(
                 title=title,
                 issue=issue,
                 is_article_of_issue=False,

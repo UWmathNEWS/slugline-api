@@ -43,32 +43,15 @@ class Article(models.Model):
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
 
+    content_html = models.TextField()
+
+    is_wordpress = models.BooleanField(default=False)
+
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
     is_article_of_issue = models.BooleanField()
     """Do we want this article to be featured on the issue page?"""
     is_promo = models.BooleanField()
-
-    def render_to_html(self):
-        """Returns this article converted to HTML for web display.
-        """
-        raise NotImplementedError('render_to_html not implemented')
-
-    def render_to_xml(self):
-        """Returns this article converted to InDesign-compatible XML
-        for print export. 
-        """
-        raise NotImplementedError('render_to_xml not implemented')
-
-    def __str__(self):
-        return f'{self.title} by {self.author}'
-
-class WordpressArticle(Article):
-    """An article imported from the Wordpress dump. Some fields may be missing.
-    """
-
-    """This is raw HTML extracted from the Wordpress dump."""
-    content_html = models.TextField()
 
     def parse_wordpress_html(self, content):
         """Reads in raw HTML from a Wordpress dump and does some
@@ -82,6 +65,18 @@ class WordpressArticle(Article):
             paragraph + '<p>' + paragraph + '</p>'
             paragraphs[idx] = paragraph
         self.content_html = '\n'.join(paragraphs)
+
+    def render_to_html(self):
+        return content_html
+
+    def render_to_xml(self):
+        """Returns this article converted to InDesign-compatible XML
+        for print export. 
+        """
+        raise NotImplementedError('render_to_xml not implemented')
+
+    def __str__(self):
+        return f'{self.title} by {self.author}'
     
 admin.site.register(Issue)
-admin.site.register(WordpressArticle)
+admin.site.register(Article)
