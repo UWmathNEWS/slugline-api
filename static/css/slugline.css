@@ -68,3 +68,8 @@ hr {
     height: 0.75em;
     width: 100%;
 }
+
+/* Make images fit their containers by default */
+img {
+    width: 100%;
+}
