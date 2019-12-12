@@ -49,8 +49,7 @@ class Command(BaseCommand):
             article = Article(
                 title=title,
                 issue=issue,
-                is_article_of_issue=False,
-                is_promo=False
+                is_wordpress=True
             )
             article.parse_wordpress_html(content)
             article.save()

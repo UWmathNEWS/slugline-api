@@ -49,9 +49,9 @@ class Article(models.Model):
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
-    is_article_of_issue = models.BooleanField()
+    is_article_of_issue = models.BooleanField(default=False)
     """Do we want this article to be featured on the issue page?"""
-    is_promo = models.BooleanField()
+    is_promo = models.BooleanField(default=False)
 
     def parse_wordpress_html(self, content):
         """Reads in raw HTML from a Wordpress dump and does some
