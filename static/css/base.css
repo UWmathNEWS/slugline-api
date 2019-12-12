@@ -18,8 +18,8 @@
 
 .header-info > h3 {
     text-align: right;
-    line-height: 0.25em;
     font-weight: normal;
+    margin-bottom: 0.25em;
 }
 
 .header-info > h3:first-child {
