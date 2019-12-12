@@ -21,7 +21,11 @@
     <div class="issue-featured">
         <h1>In this issue:</h1>
         {% for featured in featured_articles %}
-        <h3>{{ featured.title }}</h3>
+        <div class="article-preview">
+            <h2>{{ featured.title }}</h2>
+            <p>{{ featured.render_to_html | safe }}</p>
+        </div>
+        <hr>
         {% endfor %}
     </div>
 </div>

@@ -22,3 +22,26 @@
     display: flex;
     flex-direction: column;
 }
+
+.issue-featured > hr {
+    margin: 1em 0;
+}
+
+.issue-featured > h1 {
+    margin-bottom: 1em;
+}
+
+.article-preview {
+    height: 20vh;
+    max-width: 100%;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+}
+
+.article-preview > h2 {
+    margin-bottom: 0;
+}
+
+.article-preview > p {
+    margin-top: 0.5em;
+}

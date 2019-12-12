@@ -67,7 +67,7 @@ class Article(models.Model):
         self.content_html = '\n'.join(paragraphs)
 
     def render_to_html(self):
-        return content_html
+        return self.content_html
 
     def render_to_xml(self):
         """Returns this article converted to InDesign-compatible XML
