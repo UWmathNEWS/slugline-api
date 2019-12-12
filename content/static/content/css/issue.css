@@ -36,12 +36,21 @@
     max-width: 100%;
     overflow-y: hidden;
     text-overflow: ellipsis;
+    position: relative;
 }
 
 .article-preview > h2 {
-    margin-bottom: 0;
+    margin-bottom: 0.5em;
 }
 
-.article-preview > p {
-    margin-top: 0.5em;
+.article-preview-body::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    background: linear-gradient(transparent 75%, var(--theme-color));
 }
+
