@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.utils.text import slugify
 
 import re
 import xml.etree.ElementTree as ETree
@@ -48,6 +49,7 @@ class Command(BaseCommand):
             )
             article = Article(
                 title=title,
+                slug=slugify(title),
                 issue=issue,
                 is_wordpress=True
             )
