@@ -22,7 +22,7 @@
         <h1>In this issue:</h1>
         {% for featured in featured_articles %}
         <div class="article-preview">
-            <h2>{{ featured.title }}</h2>
+            <a href="/articles/{{ featured.id }}/{{ featured.slug }}"><h2>{{ featured.title }}</h2></a>
             <div class="article-preview-body">
                 {{ featured.render_to_html | safe }}
             </div>

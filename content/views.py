@@ -5,7 +5,7 @@ from django.db.models.functions import Length
 
 
 from common.views import BaseView
-from content.models import Issue
+from content.models import Issue, Article
 
 class IssuesList(BaseView):
 
@@ -69,4 +69,14 @@ class IssueView(BaseView):
         except Issue.DoesNotExist:
             raise Http404
         ctx['featured_articles'] = self.get_featured_articles(ctx['issue'])
+        return ctx
+
+class ArticleView(BaseView):
+
+    template_name = 'content/article.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Technically there is a slug parameter, but we don't use it
+        ctx['article'] =Article.objects.get(id=kwargs['id'])
         return ctx

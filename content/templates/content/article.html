@@ -1,0 +1,22 @@
+{% extends 'common/base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'content/css/article.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="article-header">
+    <h1>{{ article.title }}</h1>
+    <div class="article-header-info">
+        <h3>{{ article.issue.long_name }}</h3>
+        <h3>{{ article.issue.publish_date }}</h3>
+    </div>
+</div>
+<hr>
+<div class="article-body">
+    {{ article.render_to_html | safe}}
+</div>
+<h3 class="article-author">{{ article.author }}</h3>
+{% endblock %}

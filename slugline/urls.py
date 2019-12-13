@@ -28,6 +28,8 @@ urlpatterns = [
     path('issues/', content.views.IssuesList.as_view()),
     path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view()),
 
+    path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view()),
+
     path('admin/', admin.site.urls),
 ]
 

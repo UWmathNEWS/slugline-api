@@ -1,0 +1,16 @@
+.article-header > h1 {
+    margin-bottom: 0.5em;
+}
+
+.article-header-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.article-body {
+    margin-bottom: 1em;
+}
+
+.article-author {
+    text-align: right;
+}
