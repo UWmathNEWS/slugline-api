@@ -39,6 +39,7 @@ class Article(models.Model):
     """
 
     title = models.CharField(max_length=255)
+    slug = models.SlugField()
     """A secondary title that is usually typeset in smaller font below the title."""
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
