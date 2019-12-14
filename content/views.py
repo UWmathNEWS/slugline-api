@@ -68,7 +68,11 @@ class IssueView(BaseView):
             ctx['issue'] = Issue.objects.get(volume_num=volume, issue_num=issue)
         except Issue.DoesNotExist:
             raise Http404
-        ctx['featured_articles'] = self.get_featured_articles(ctx['issue'])
+        featured_articles = self.get_featured_articles(ctx['issue'])
+        featured_ids = [a.id for a in featured_articles]
+        articles = ctx['issue'].article_set.exclude(id__in=featured_ids)
+        ctx['featured_articles'] = featured_articles
+        ctx['articles'] = articles
         return ctx
 
 class ArticleView(BaseView):

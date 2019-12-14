@@ -30,5 +30,16 @@
         <hr>
         {% endfor %}
     </div>
+    <div class="issue-all-articles">
+        {% for article in articles %}
+        <div class="article-preview">
+            <a href="/articles/{{ article.id }}/{{ article.slug }}"><h2>{{ article.title }}</h2></a>
+            <div class="article-preview-body">
+                {{ article.render_to_html | safe }}
+            </div>
+        </div>
+        <hr>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
