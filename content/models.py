@@ -54,19 +54,6 @@ class Article(models.Model):
     """Do we want this article to be featured on the issue page?"""
     is_promo = models.BooleanField(default=False)
 
-    def parse_wordpress_html(self, content):
-        """Reads in raw HTML from a Wordpress dump and does some
-        post-processing to add paragraph breaks and attempt to 
-        extract the author name
-        """
-        paragraphs = content.split('\n')
-        # This is ghetto, but should be fine
-        self.author = strip_tags(paragraphs[-1])
-        for idx, paragraph in enumerate(paragraphs):
-            paragraph + '<p>' + paragraph + '</p>'
-            paragraphs[idx] = paragraph
-        self.content_html = '\n'.join(paragraphs)
-
     def render_to_html(self):
         return self.content_html
 
