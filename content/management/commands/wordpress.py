@@ -67,7 +67,7 @@ class Command(BaseCommand):
                     pass
                 for para in paras:
                     p_tag = new_soup.new_tag('p')
-                    p_tag.string = para
+                    p_tag.string = para.strip()
                     new_soup.append(p_tag)
             elif self.is_block_element(elem):
                 new_soup.append(copy.copy(elem))
@@ -101,6 +101,8 @@ class Command(BaseCommand):
             issue_num=issue_num,
             volume_num=volume_num
         )
+        # get rid of the mysterious &nbsp's Wordpress insists on putting everywhere
+        content = content.replace('&nbsp;', ' ').strip()
         content_html, author = self.parse_wordpress_html(content)
         return Article(
             title=title,
