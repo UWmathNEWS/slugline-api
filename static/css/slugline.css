@@ -68,5 +68,9 @@ hr {
 
 /* Make images fit their containers by default */
 img {
-    width: 100%;
+    display: block;
+    width: 50vw;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
