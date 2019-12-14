@@ -26,9 +26,10 @@
     font-family: DIN Next;
 }
 
-/* Set a themed background */
+/* Set a themed background and default font */
 html {
     background-color: var(--theme-color);
+    font-family: Joanna Nova;
 }
 
 .blackbox {
@@ -49,10 +50,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: DIN Next;
     text-transform: uppercase;
     line-height: 1em;
-}
-
-p {
-    font-family: Joanna Nova;
 }
 
 /* Disable automatic link styles */
