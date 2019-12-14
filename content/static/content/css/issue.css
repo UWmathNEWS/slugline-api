@@ -7,7 +7,7 @@
 }
 
 .issue-pdf {
-    flex: 0 0 66%;
+    flex: 2 0 0;
     padding-right: 1em;
 }
 
@@ -18,7 +18,7 @@
 
 
 .issue-featured {
-    flex: 0 0 32%;
+    flex: 1 1 0;
 
     display: flex;
     flex-direction: column;
