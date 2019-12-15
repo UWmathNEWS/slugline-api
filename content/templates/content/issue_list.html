@@ -16,7 +16,7 @@
         </div>
         <div class="issue-list">
             {% for issue in volume %}
-            <a href="{% url 'issue' volume_num issue_num %}" class="issue-preview">
+            <a href="{% url 'issue' issue.volume_num issue.issue_num %}" class="issue-preview">
                 <img src="{% static 'content/img/cover_unknown.png' %}">
                 <h3>Issue {{ issue.issue_num }}</h3>
             </a>
