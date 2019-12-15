@@ -10,7 +10,9 @@
 <div class="article-header">
     <h1>{{ article.title }}</h1>
     <div class="article-header-info">
-        <h3>{{ article.issue.long_name }}</h3>
+        <a href="{% url 'issue' article.issue.volume_num article.issue.issue_num %}">
+            <h3>{{ article.issue.long_name }}</h3>
+        </a>
         <h3>{{ article.issue.publish_date }}</h3>
     </div>
 </div>
