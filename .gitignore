@@ -95,7 +95,7 @@ db.sqlite3
 wordpress_dump.xml
 
 # Fonts, which we can't redistribute
-static/fonts/
+common/static/common/fonts/
 
 
 # Media files
