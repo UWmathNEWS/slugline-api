@@ -25,7 +25,7 @@ import content.views
 urlpatterns = [
     path('', common.views.HomeView.as_view(), name='home'),
 
-    path('issues/', content.views.IssuesList.as_view(), name='issue_list'),
+    path('issues/', content.views.IssuesList.as_view(), name='issues'),
     path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view(), name='issue'),
 
     path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view(), name='article'),
