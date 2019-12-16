@@ -12,5 +12,45 @@
     <a href="{% url 'logout' %}"><h3>Log Out</h3></a>
 </div>
 <hr>
-<p>There's going to be stuff here later.</p>
+<div class="user-articles">
+    <div class="user-articles-header">
+        <h1>Your Articles</h1>    
+        <button>+ New Article</button>
+    </div>
+    <table>
+        <tr>
+            <th>Article</th>
+            <th>Yes</th>
+        </tr>
+        {% for article in articles %}
+        <tr>
+            <td>{{ article.title }}</td>
+            <td>YES</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">Looks like you don't have any articles. Get to it!</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="user-articles-footer">
+        <div class="paginator">
+            <a href="?page=1" class="page-link">&lt;&lt;</a>
+            {% if articles.has_previous %}
+            <a href="?page={{ articles.previous_page_number }}" class="page-link">&lt;</a>
+            {% endif %}
+            {% for page in articles.paginator.page_range %}
+            {% if page == articles.number %}
+            <a href="?page={{ page }}" class="page-link active">{{ page }}</a>
+            {% else %}
+            <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+            {% endif %}
+            {% endfor %}
+            {% if articles.has_next %}
+            <a href="?page={{ articles.next_page_number }}" class="page-link">&gt;</a>
+            {% endif %}
+            <a href="?page={{ articles.paginator.num_pages }}" class="page-link">&gt;&gt;</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

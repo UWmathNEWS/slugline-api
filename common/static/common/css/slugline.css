@@ -74,3 +74,60 @@ img {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* Table styling */ 
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+tr {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+td, th {
+    padding: 0.5em;
+    font-size: 1.25em;
+}
+
+th {
+    text-align: left;
+    font-family: DIN Next;
+}
+
+/* Page number styling */
+.paginator {
+    display: flex;
+    justify-content: space-between;
+}
+
+.page-link {
+    background-color: black;
+    color: var(--theme-color);
+    font-family: DIN Next;
+    font-size: 1.25em;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+
+    vertical-align: middle;
+    text-align: center;
+
+    margin: 5px;
+}
+
+.page-link.active {
+    text-decoration: underline;
+}
+
+/* Form styling */
+button {
+    font-family: DIN Next;
+    font-size: 1.5em;
+    line-height: 1.5em;
+    text-transform: uppercase;
+    background-color: black;
+    border: none;
+    color: var(--theme-color);
+}
