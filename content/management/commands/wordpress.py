@@ -110,7 +110,8 @@ class Command(BaseCommand):
             author=author,
             content_html=content_html,
             issue=issue,
-            is_wordpress=True
+            is_wordpress=True,
+            user=None
         )
 
     def handle(self, *args, **options):
