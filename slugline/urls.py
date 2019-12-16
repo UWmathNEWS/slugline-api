@@ -21,6 +21,7 @@ from django.shortcuts import render
 
 import common.views
 import content.views
+import user.views
 
 urlpatterns = [
     path('', common.views.HomeView.as_view(), name='home'),
@@ -29,6 +30,9 @@ urlpatterns = [
     path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view(), name='issue'),
 
     path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view(), name='article'),
+
+    path('login.', user.views.LoginView.as_view(), name='login'),
+    path('dash/', user.views.DashView.as_view(), name='dash'),
 
     path('admin/', admin.site.urls),
 ]
