@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from django.utils.html import strip_tags
 
+from user.models import SluglineUser
+
 class IssueManager(models.Manager):
 
     def latest_issue(self):
@@ -53,6 +55,8 @@ class Article(models.Model):
     is_article_of_issue = models.BooleanField(default=False)
     """Do we want this article to be featured on the issue page?"""
     is_promo = models.BooleanField(default=False)
+
+    user = models.ForeignKey(SluglineUser, on_delete=models.SET_NULL, null=True)
 
     def render_to_html(self):
         return self.content_html
