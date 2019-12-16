@@ -106,6 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'user.SluglineUser'
 LOGIN_REDIRECT_URL = '/dash/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

@@ -1,6 +1,16 @@
 {% extends 'common/base.html' %}
 
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'user/css/dash.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Welcome: {{ user.get_username }}</h1>
+<div class="dash-header">
+    <h1>{{ user.get_username }}</h1>
+    <a href="{% url 'logout' %}"><h3>Log Out</h3></a>
+</div>
+<hr>
 <p>There's going to be stuff here later.</p>
 {% endblock %}

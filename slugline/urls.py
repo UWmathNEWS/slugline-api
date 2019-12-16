@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 from django.shortcuts import render
 
@@ -31,7 +32,8 @@ urlpatterns = [
 
     path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view(), name='article'),
 
-    path('login.', user.views.LoginView.as_view(), name='login'),
+    path('login/', user.views.LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('dash/', user.views.DashView.as_view(), name='dash'),
 
     path('admin/', admin.site.urls),
