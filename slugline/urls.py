@@ -31,6 +31,8 @@ urlpatterns = [
     path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view(), name='issue'),
 
     path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view(), name='article'),
+    path('articles/<int:id>/edit', content.views.ArticleEditView.as_view(), name='article_edit'),
+    
 
     path('login/', user.views.LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),

@@ -82,5 +82,14 @@ class ArticleView(BaseView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         # Technically there is a slug parameter, but we don't use it
-        ctx['article'] =Article.objects.get(id=kwargs['id'])
+        ctx['article'] = Article.objects.get(id=kwargs['id'])
+        return ctx
+
+class ArticleEditView(BaseView):
+
+    template_name = 'content/article_edit.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['article'] = Article.objects.get(id=kwargs['id'])
         return ctx

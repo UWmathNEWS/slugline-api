@@ -20,12 +20,12 @@
     <table>
         <tr>
             <th>Article</th>
-            <th>Yes</th>
+            <th></th>
         </tr>
         {% for article in articles %}
         <tr>
             <td>{{ article.title }}</td>
-            <td>YES</td>
+            <td><a href="{% url 'article_edit' article.id %}">Edit</td>
         </tr>
         {% empty %}
         <tr>
