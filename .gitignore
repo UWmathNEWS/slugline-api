@@ -97,6 +97,8 @@ wordpress_dump.xml
 # Fonts, which we can't redistribute
 common/static/common/fonts/
 
+# Bootstrap which is huge and shouldn't be in the repo
+common/static/bootstrap/
 
 # Media files
 media/

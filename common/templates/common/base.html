@@ -1,32 +1,42 @@
 {% load static %}
+{% load sass_tags %}
 
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="{% static 'common/css/slugline.css' %}">
-        <link rel="stylesheet" href="{% static 'common/css/base.css' %}">
-        {% block css %}
+        <link rel="stylesheet" href="{% sass_src 'common/scss/slugline.scss' %}" type="text/css">
+        <link rel="stylesheet" href="{% sass_src 'common/scss/base.scss' %}" type="text/css">
+        {% block scss %}
         {% endblock %}
     </head>
     <body>
-        <div class="slugline-container">
-            <div class="slugline-header blackbox">
-                <a class="mathnews-brand mathnews-logo" href="/"></a>
-                <div class="header-info">
-                    <h3>VOLUME {{ latest_issue.volume_num }} · ISSUE {{ latest_issue.issue_num }}</h3>
-                    <h3>{% now 'F j, Y' %}</h3>
+        <div class="container">
+            <div class="blackbox">
+                <div class="col-sm-6">
+                    <a class="mb-0 display-1 header-logo mathnews-logo" href="/"></a>
+                </div>
+                <div class="col-sm-6">
+                    <h3 class="text-right">VOLUME {{ latest_issue.volume_num }} · ISSUE {{ latest_issue.issue_num }}</h3 class="text-right">
+                    <h3 class="text-right mb-0">{% now 'F j, Y' %}</h3>
                 </div>
             </div>
-            <div class="slugline-nav blackbox">
-                <a href="{% url 'issues' %}">ISSUES</a>
-                <a>OTHER THINGS</a>
-                <a>SUBMIT AN ARTICLE</a>
-                {% if request.user.is_authenticated %}
-                <a href="{% url 'dash' %}">DASH</a>
-                {% else %}
-                <a href="{% url 'login' %}">LOGIN</a>
-                {% endif %}
-            </div>
+            <nav class="navbar navbar-expand-sm blackbox">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBody">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBody">
+                    <div class="navbar-nav w-100 nav-fill">
+                        <a class="h5 mb-0 nav-item nav-link" href="{% url 'issues' %}">ISSUES</a>
+                        <a class="h5 mb-0 nav-item nav-link">OTHER THINGS</a>
+                        <a class="h5 mb-0 nav-item nav-link">SUBMIT AN ARTICLE</a>
+                        {% if request.user.is_authenticated %}
+                        <a class="h5 mb-0 nav-item nav-link" href="{% url 'dash' %}">DASH</a>
+                        {% else %}
+                        <a class="h5 mb-0 nav-item nav-link" href="{% url 'login' %}">LOGIN</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
             {% block content %}
             {% endblock %}
         </div>
