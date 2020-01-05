@@ -102,4 +102,4 @@ common/static/common/fonts/
 media/
 
 # Collected static files
-static/
+/static/
