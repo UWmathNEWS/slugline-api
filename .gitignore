@@ -100,3 +100,6 @@ common/static/common/fonts/
 
 # Media files
 media/
+
+# Collected static files
+static/
