@@ -17,15 +17,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.urls import path
+from django.urls import path, include
 from django.shortcuts import render
 
 import common.views
+import content.urls
 import content.views
 import user.views
 
 urlpatterns = [
     path('', common.views.HomeView.as_view(), name='home'),
+
+    path('api/', include(content.urls)),
 
     path('issues/', content.views.IssuesList.as_view(), name='issues'),
     path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view(), name='issue'),
