@@ -11,6 +11,7 @@ beautifulsoup4 = "*"
 libsass = "*"
 django-compressor = "*"
 django-sass-processor = "*"
+djangorestframework = "*"
 
 [requires]
 python_version = "3.7"
