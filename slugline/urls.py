@@ -26,25 +26,10 @@ import content.views
 import user.views
 
 urlpatterns = [
-    path('', common.views.HomeView.as_view(), name='home'),
-
     path('api/', include(content.urls)),
-
-    path('issues/', content.views.IssuesList.as_view(), name='issues'),
-    path('issues/<int:volume>/<int:issue>/', content.views.IssueView.as_view(), name='issue'),
-
-    path('articles/<int:id>/<slug:slug>/', content.views.ArticleView.as_view(), name='article'),
-    path('articles/<int:id>/edit', content.views.ArticleEditView.as_view(), name='article_edit'),
-    
-
-    path('login/', user.views.LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-    path('dash/', user.views.DashView.as_view(), name='dash'),
 
     path('admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-handler404 = common.views.page_not_found
