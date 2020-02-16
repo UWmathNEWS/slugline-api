@@ -1,14 +1,15 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 
-from rest_framework.decorators import api_view
-from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
 from user.models import UserSerializer
 
 @api_view(['POST'])
-def auth_view(request):
+def login_view(request):
     username = request.data.get('username', None)
     password = request.data.get('password', None)
     if username is None or password is None:
@@ -16,8 +17,24 @@ def auth_view(request):
     user = authenticate(username=username, password=password)
     if user is None:
         raise APIException('Invalid username or password.')
-    token, _ = Token.objects.get_or_create(user=user)
-    return Response({
-        'user': UserSerializer(user).data,
-        'token': token.key
-    })
+    login(request, user)
+    return Response(UserSerializer(user).data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    logout(request)
+    return Response()
+
+@api_view(['GET'])
+def auth_view(request):
+    if request.user is None:
+        return Response({
+            'authenticated': False
+        })
+    else:
+        return Response({
+            'authenticated': True,
+            'user': UserSerializer(request.user).data
+        })
+    
