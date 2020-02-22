@@ -8,6 +8,11 @@ class SluglineUser(AbstractUser):
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
 
+    @property
+    def is_editor(self):
+        """Is this user an editor?"""
+        return self.groups.filter(name='Editor').exists()
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta: 
@@ -18,6 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'is_staff',
+            'is_editor',
             'writer_name'
         )
-    
