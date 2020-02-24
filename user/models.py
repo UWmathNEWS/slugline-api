@@ -1,10 +1,13 @@
 from django.db import models
 
-from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError, FieldDoesNotExist
+from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
 
-class SluglineUser(AbstractUser):
 
+class SluglineUser(AbstractUser):
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
 
@@ -13,12 +16,58 @@ class SluglineUser(AbstractUser):
         """Is this user an editor?"""
         return self.groups.filter(name='Editor').exists()
 
+
 class UserSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        user = SluglineUser.objects.create(**validated_data)
+        user.groups.add(Group.objects.get(name='Contributor'))
+        return user
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.writer_name = validated_data.get('writer_name', instance.writer_name)
+        instance.save()
+        return instance
+
+    def validate(self, data):
+        # Quickly validate that the username field is unique
+        errors_list = []
+        if SluglineUser.objects.filter(username=data['username']):
+            errors_list.append('Username already exists.')
+        if len(errors_list):
+            raise serializers.ValidationError(errors_list)
+
+        if 'password' in data:
+            try:
+                validate_password(data['password'], user=SluglineUser.objects.get(username=data['username']))
+            except SluglineUser.DoesNotExist:
+                # To get around a non-existent user, we create a phony one.
+                # It's super hacky, but it _works_.
+                class PhonyUser:
+                    username = data['username']
+                    email = data['email']
+                    first_name = data['first_name']
+                    last_name = data['last_name']
+
+                    @property
+                    def _meta(self):
+                        raise FieldDoesNotExist()
+
+                validate_password(data['password'], user=PhonyUser())
+            except ValidationError as err:
+                raise serializers.ValidationError(map(lambda e: e.message, err.error_list))
+        return data
 
     class Meta: 
         model = SluglineUser
         fields = (
             'username',
+            'password',
             'first_name',
             'last_name',
             'email',
@@ -26,3 +75,9 @@ class UserSerializer(serializers.ModelSerializer):
             'is_editor',
             'writer_name'
         )
+        read_only_fields = ('is_staff',)
+        extra_kwargs = {
+            'password': {
+                'write_only': True
+            }
+        }
