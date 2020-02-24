@@ -1,6 +1,7 @@
 from django.db import models
 
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.password_validation import validate_password
 
@@ -16,11 +17,22 @@ class SluglineUser(AbstractUser):
         """Is this user an editor?"""
         return self.groups.filter(name='Editor').exists()
 
+    @is_editor.setter
+    def is_editor(self, value):
+        pass
+
 
 class UserSerializer(serializers.ModelSerializer):
+    is_editor = serializers.BooleanField(default=False)
+
     def create(self, validated_data):
         user = SluglineUser.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
         user.groups.add(Group.objects.get(name='Contributor'))
+
+        if validated_data['is_editor']:
+            user.groups.add(Group.objects.get(name='Editor'))
+
         return user
 
     def update(self, instance, validated_data):
@@ -31,24 +43,36 @@ class UserSerializer(serializers.ModelSerializer):
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
         instance.writer_name = validated_data.get('writer_name', instance.writer_name)
+
         instance.save()
+
+        if validated_data.get('is_editor', False):
+            instance.groups.add(Group.objects.get(name='Editor'))
+        elif not validated_data.get('is_editor', True):
+            instance.groups.remove(Group.objects.get(name='Editor'))
+
         return instance
 
     def validate(self, data):
-        # Quickly validate that the username field is unique
+        # Quickly validate username and email
         errors_list = {}
-        if SluglineUser.objects.filter(username=data['username']):
+        if SluglineUser.objects.filter(username=data.get('username', None)).exists():
             errors_list['username'] = 'Username already exists.'
-        if len(errors_list):
-            raise serializers.ValidationError(errors_list)
+        if 'email' in data:
+            try:
+                validate_email(data['email'])
+            except ValidationError as err:
+                errors_list['email'] = err.message
 
         if 'password' in data:
             try:
-                validate_password(data['password'], user=SluglineUser.objects.get(username=data['username']))
-            except SluglineUser.DoesNotExist:
                 validate_password(data['password'], user=SluglineUser(**data))
             except ValidationError as err:
-                raise serializers.ValidationError({'password': map(lambda e: e.message, err.error_list)})
+                errors_list['password'] = list(map(lambda e: e.message, err.error_list))
+
+        if len(errors_list):
+            raise serializers.ValidationError(errors_list)
+
         return data
 
     class Meta: 

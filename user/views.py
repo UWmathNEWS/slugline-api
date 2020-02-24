@@ -122,7 +122,7 @@ def update_user(user, data):
 @permission_classes([IsEditor])
 def update_generic_user_view(request, username):
     try:
-        return update_user(user=SluglineUser.objects.get(username=username), data=request.data['data'])
+        return update_user(user=SluglineUser.objects.get(username=username), data=request.data)
     except SluglineUser.DoesNotExist:
         raise APIException('User does not exist.')
 
