@@ -1,6 +1,6 @@
 from django.db import models
 
-from django.core.exceptions import ValidationError, FieldDoesNotExist
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.password_validation import validate_password
 
@@ -36,9 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Quickly validate that the username field is unique
-        errors_list = []
+        errors_list = {}
         if SluglineUser.objects.filter(username=data['username']):
-            errors_list.append('Username already exists.')
+            errors_list['username'] = 'Username already exists.'
         if len(errors_list):
             raise serializers.ValidationError(errors_list)
 
@@ -46,21 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
             try:
                 validate_password(data['password'], user=SluglineUser.objects.get(username=data['username']))
             except SluglineUser.DoesNotExist:
-                # To get around a non-existent user, we create a phony one.
-                # It's super hacky, but it _works_.
-                class PhonyUser:
-                    username = data['username']
-                    email = data['email']
-                    first_name = data['first_name']
-                    last_name = data['last_name']
-
-                    @property
-                    def _meta(self):
-                        raise FieldDoesNotExist()
-
-                validate_password(data['password'], user=PhonyUser())
+                validate_password(data['password'], user=SluglineUser(**data))
             except ValidationError as err:
-                raise serializers.ValidationError(map(lambda e: e.message, err.error_list))
+                raise serializers.ValidationError({'password': map(lambda e: e.message, err.error_list)})
         return data
 
     class Meta: 
