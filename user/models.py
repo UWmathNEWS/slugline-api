@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.password_validation import UserAttributeSimilarityValidator,\
+    MinimumLengthValidator, CommonPasswordValidator, NumericPasswordValidator
 
 from rest_framework import serializers
 
@@ -57,15 +59,23 @@ class UserSerializer(serializers.ModelSerializer):
         # Quickly validate username and email
         errors_list = {}
         if SluglineUser.objects.filter(username=data.get('username', None)).exists():
-            errors_list['username'] = 'Username already exists.'
+            errors_list['username'] = ['Username already exists.']
         if 'email' in data:
             try:
                 validate_email(data['email'])
             except ValidationError as err:
-                errors_list['email'] = err.message
+                errors_list['email'] = [err.message]
 
         if 'password' in data:
             try:
+                password_validators = (
+                    MinimumLengthValidator(),
+                    NumericPasswordValidator(),
+                    CommonPasswordValidator(),
+                    UserAttributeSimilarityValidator(
+                        user_attributes=(*UserAttributeSimilarityValidator.DEFAULT_USER_ATTRIBUTES, 'writer_name')
+                    )
+                )
                 validate_password(data['password'], user=SluglineUser(**data))
             except ValidationError as err:
                 errors_list['password'] = list(map(lambda e: e.message, err.error_list))

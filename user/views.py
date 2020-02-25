@@ -14,15 +14,23 @@ class IsEditor(BasePermission):
         return bool(request.user and (request.user.is_editor or request.user.is_staff))
 
 
+class SluglineAPIException(APIException):
+    def __init__(self, detail):
+        super().__init__(detail={
+            'success': False,
+            'error': [detail] if isinstance(detail, str) else detail
+        })
+
+
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get('username', None)
     password = request.data.get('password', None)
     if username is None or password is None:
-        raise APIException('Username and password are required.')
+        raise SluglineAPIException('Username and password are required.')
     user = authenticate(username=username, password=password)
     if user is None:
-        raise APIException('Invalid username or password.')
+        raise SluglineAPIException('Invalid username or password.')
     login(request, user)
     return Response(UserSerializer(user).data)
 
@@ -61,7 +69,7 @@ def list_user_view(request, username):
     try:
         return Response(UserSerializer(SluglineUser.objects.get(username=username)).data)
     except SluglineUser.DoesNotExist:
-        raise APIException('User does not exist.')
+        raise SluglineAPIException('User does not exist.')
 
 
 @api_view(['PUT'])
@@ -78,7 +86,7 @@ def create_user_view(request, username):
     serializer = UserSerializer(data=request.data)
     serializer.is_valid()
     if len(serializer.errors):
-        raise APIException(serializer.errors)
+        raise SluglineAPIException(serializer.errors)
     else:
         try:
             serializer.save()
@@ -87,16 +95,16 @@ def create_user_view(request, username):
                 'user': serializer.data
             })
         except Exception:
-            raise APIException('Could not create user.')
+            raise SluglineAPIException('Could not create user.')
 
 
 def update_user(user, data):
     if 'new_password' in data:
         password = data.get('cur_password', '')
         if not user.check_password(password):
-            raise APIException('Current password incorrect.')
+            raise SluglineAPIException('Current password incorrect.')
         if 'repeat_password' not in data or data['new_password'] != data['repeat_password']:
-            raise APIException('Passwords do not match.')
+            raise SluglineAPIException('Passwords do not match.')
         data['password'] = data['new_password']
         del data['cur_password']
         del data['new_password']
@@ -106,7 +114,7 @@ def update_user(user, data):
     serializer = UserSerializer(data=data, instance=user, partial=True)
     serializer.is_valid()
     if len(serializer.errors):
-        raise APIException(serializer.errors)
+        raise SluglineAPIException(serializer.errors)
     else:
         try:
             serializer.save()
@@ -115,7 +123,7 @@ def update_user(user, data):
                 'user': serializer.data
             })
         except Exception:
-            raise APIException('Could not update profile.')
+            raise SluglineAPIException('Could not update profile.')
 
 
 @api_view(['POST'])
@@ -124,14 +132,14 @@ def update_generic_user_view(request, username):
     try:
         return update_user(user=SluglineUser.objects.get(username=username), data=request.data)
     except SluglineUser.DoesNotExist:
-        raise APIException('User does not exist.')
+        raise SluglineAPIException('User does not exist.')
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
-    if not request.user.is_editor and any(['is_editor' in request.data]):
-        raise APIException('Not enough privileges to change field.')
+    if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
+        raise SluglineAPIException('Not enough privileges to change field.')
     return update_user(user=request.user, data=request.data)
 
 
@@ -144,6 +152,6 @@ def delete_user_view(request, username):
             'success': True
         })
     except SluglineUser.DoesNotExist:
-        raise APIException('User does not exist.')
+        raise SluglineAPIException('User does not exist.')
     except Exception:
-        raise APIException('Could not delete user.')
+        raise SluglineAPIException('Could not delete user.')
