@@ -102,9 +102,9 @@ def update_user(user, data):
     if 'new_password' in data:
         password = data.get('cur_password', '')
         if not user.check_password(password):
-            raise SluglineAPIException('Current password incorrect.')
+            raise SluglineAPIException({'user': ['Current password incorrect.']})
         if 'repeat_password' not in data or data['new_password'] != data['repeat_password']:
-            raise SluglineAPIException('Passwords do not match.')
+            raise SluglineAPIException({'user': ['Passwords do not match.']})
         data['password'] = data['new_password']
         del data['cur_password']
         del data['new_password']

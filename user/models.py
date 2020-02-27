@@ -28,6 +28,8 @@ class UserSerializer(serializers.ModelSerializer):
     is_editor = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
+        if SluglineUser.objects.filter(username=validated_data.get('username', None)).exists():
+            raise serializers.ValidationError({'username': ['Username already exists.']})
         user = SluglineUser.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.groups.add(Group.objects.get(name='Contributor'))
@@ -58,8 +60,6 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # Quickly validate username and email
         errors_list = {}
-        if SluglineUser.objects.filter(username=data.get('username', None)).exists():
-            errors_list['username'] = ['Username already exists.']
         if 'email' in data:
             try:
                 validate_email(data['email'])
