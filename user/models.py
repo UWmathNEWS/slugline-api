@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if SluglineUser.objects.filter(username=validated_data.get('username', None)).exists():
-            raise serializers.ValidationError({'username': ['Username already exists.']})
+            raise serializers.ValidationError({'username': ['USER.USERNAME.ALREADY_EXISTS']})
         user = SluglineUser.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.groups.add(Group.objects.get(name='Contributor'))
@@ -64,10 +64,11 @@ class UserSerializer(serializers.ModelSerializer):
             try:
                 validate_email(data['email'])
             except ValidationError as err:
-                errors_list['email'] = [err.message]
+                errors_list['email'] = ['USER.EMAIL.INVALID']
 
         if 'password' in data:
             try:
+                user = self.instance or SluglineUser(**data)
                 password_validators = (
                     MinimumLengthValidator(),
                     NumericPasswordValidator(),
@@ -76,9 +77,13 @@ class UserSerializer(serializers.ModelSerializer):
                         user_attributes=(*UserAttributeSimilarityValidator.DEFAULT_USER_ATTRIBUTES, 'writer_name')
                     )
                 )
-                validate_password(data['password'], user=SluglineUser(**data))
+                validate_password(data['password'], user=user, password_validators=password_validators)
             except ValidationError as err:
-                errors_list['password'] = list(map(lambda e: e.message, err.error_list))
+                print(list(map(lambda e: (e.code, e.params), err.error_list)))
+                errors_list['password'] = list(
+                    map(lambda e: 'USER.' + e.code.replace('_', '.', 1).upper() +
+                                  ('.' + ','.join(e.params.values()).replace(' ', '_') if e.params is not None else ''),
+                        err.error_list))
 
         if len(errors_list):
             raise serializers.ValidationError(errors_list)

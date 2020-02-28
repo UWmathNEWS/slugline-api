@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -27,10 +27,10 @@ def login_view(request):
     username = request.data.get('username', None)
     password = request.data.get('password', None)
     if username is None or password is None:
-        raise SluglineAPIException('Username and password are required.')
+        raise SluglineAPIException('AUTH.CREDENTIALS_NONEXISTENT')
     user = authenticate(username=username, password=password)
     if user is None:
-        raise SluglineAPIException('Invalid username or password.')
+        raise SluglineAPIException('AUTH.CREDENTIALS_INVALID')
     login(request, user)
     return Response(UserSerializer(user).data)
 
@@ -69,7 +69,7 @@ def list_user_view(request, username):
     try:
         return Response(UserSerializer(SluglineUser.objects.get(username=username)).data)
     except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('User does not exist.')
+        raise SluglineAPIException('USER.DOES_NOT_EXIST')
 
 
 @api_view(['PUT'])
@@ -95,16 +95,17 @@ def create_user_view(request, username):
                 'user': serializer.data
             })
         except Exception:
-            raise SluglineAPIException('Could not create user.')
+            raise SluglineAPIException('USER.COULD_NOT_CREATE')
 
 
-def update_user(user, data):
+def update_user(user, request):
+    data = request.data
     if 'new_password' in data:
         password = data.get('cur_password', '')
         if not user.check_password(password):
-            raise SluglineAPIException({'user': ['Current password incorrect.']})
+            raise SluglineAPIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
         if 'repeat_password' not in data or data['new_password'] != data['repeat_password']:
-            raise SluglineAPIException({'user': ['Passwords do not match.']})
+            raise SluglineAPIException({'user': ['USER.PASSWORD.MUST_MATCH']})
         data['password'] = data['new_password']
         del data['cur_password']
         del data['new_password']
@@ -117,30 +118,32 @@ def update_user(user, data):
         raise SluglineAPIException(serializer.errors)
     else:
         try:
-            serializer.save()
+            updated_user = serializer.save()
+            if 'password' in data:
+                update_session_auth_hash(request, updated_user)
             return Response({
                 'success': True,
                 'user': serializer.data
             })
         except Exception:
-            raise SluglineAPIException('Could not update profile.')
+            raise SluglineAPIException('USER.COULD_NOT_UPDATE')
 
 
 @api_view(['POST'])
 @permission_classes([IsEditor])
 def update_generic_user_view(request, username):
     try:
-        return update_user(user=SluglineUser.objects.get(username=username), data=request.data)
+        return update_user(user=SluglineUser.objects.get(username=username), request=request)
     except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('User does not exist.')
+        raise SluglineAPIException('USER.DOES_NOT_EXIST')
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
     if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
-        raise SluglineAPIException('Not enough privileges to change field.')
-    return update_user(user=request.user, data=request.data)
+        raise SluglineAPIException('USER.NOT_ENOUGH_PRIVILEGES')
+    return update_user(user=request.user, request=request)
 
 
 @api_view(['DELETE'])
@@ -152,6 +155,6 @@ def delete_user_view(request, username):
             'success': True
         })
     except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('User does not exist.')
+        raise SluglineAPIException('USER.DOES_NOT_EXIST')
     except Exception:
-        raise SluglineAPIException('Could not delete user.')
+        raise SluglineAPIException('USER.COULD_NOT_DELETE')
