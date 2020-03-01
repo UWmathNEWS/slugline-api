@@ -28,7 +28,7 @@ def logout_view(request):
 
 @api_view(['GET'])
 def auth_view(request):
-    if request.user is None:
+    if request.user is None or request.user.is_anonymous:
         return Response({
             'authenticated': False
         })
