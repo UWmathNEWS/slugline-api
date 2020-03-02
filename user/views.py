@@ -142,7 +142,7 @@ def update_generic_user_view(request, username):
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
     if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
-        raise SluglineAPIException('USER.NOT_ENOUGH_PRIVILEGES')
+        raise SluglineAPIException('USER.INSUFFICIENT_PRIVILEGES')
     return update_user(user=request.user, request=request)
 
 
