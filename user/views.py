@@ -101,13 +101,17 @@ def create_user_view(request, username):
 def update_user(user, request):
     data = request.data
     if 'new_password' in data:
-        password = data.get('cur_password', '')
-        if not user.check_password(password):
-            raise SluglineAPIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
+        # We skip password checking ONLY on a password reset, i.e. an editor is updating an arbitrary user's password
+        if user is not request.user and request.user.is_editor:
+            pass
+        else:
+            password = data.get('cur_password', '')
+            if not user.check_password(password):
+                raise SluglineAPIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
+            del data['cur_password']
         if 'repeat_password' not in data or data['new_password'] != data['repeat_password']:
             raise SluglineAPIException({'user': ['USER.PASSWORD.MUST_MATCH']})
         data['password'] = data['new_password']
-        del data['cur_password']
         del data['new_password']
         del data['repeat_password']
 
