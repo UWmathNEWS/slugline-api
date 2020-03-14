@@ -65,6 +65,14 @@ def list_users_view(request):
 
 @api_view(['GET'])
 @permission_classes([IsEditor])
+def query_user_view(request, username):
+    return Response({
+        'success': not SluglineUser.objects.filter(username=username).exists() and len(username) <= 150
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsEditor])
 def list_user_view(request, username):
     try:
         return Response(UserSerializer(SluglineUser.objects.get(username=username)).data)
@@ -74,15 +82,13 @@ def list_user_view(request, username):
 
 @api_view(['PUT'])
 @permission_classes([IsEditor])
-def create_user_view(request, username):
-    if SluglineUser.objects.filter(username=username).exists():
-        return Response({
-            'success': False,
-            # NOTE: do we really need to return the user?
-            'user': UserSerializer(SluglineUser.objects.get(username=username)).data
-        })
+def create_user_view(request):
+    if SluglineUser.objects.filter(username=request.data['username']).exists():
+        raise SluglineAPIException({'username': ['USER.USERNAME.ALREADY_EXISTS']})
+    # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
+    if len(request.data['username']) > 150:
+        raise SluglineAPIException({'username': ['USER.USERNAME.TOO_LONG']})
 
-    request.data['username'] = username
     serializer = UserSerializer(data=request.data)
     serializer.is_valid()
     if len(serializer.errors):
@@ -100,7 +106,7 @@ def create_user_view(request, username):
 
 def update_user(user, request):
     data = request.data
-    if 'new_password' in data:
+    if 'password' in data:
         # We skip password checking ONLY on a password reset, i.e. an editor is updating an arbitrary user's password
         if user is not request.user and request.user.is_editor:
             pass
@@ -109,11 +115,6 @@ def update_user(user, request):
             if not user.check_password(password):
                 raise SluglineAPIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
             del data['cur_password']
-        if 'repeat_password' not in data or data['new_password'] != data['repeat_password']:
-            raise SluglineAPIException({'user': ['USER.PASSWORD.MUST_MATCH']})
-        data['password'] = data['new_password']
-        del data['new_password']
-        del data['repeat_password']
 
     # We set the partial flag as the front-end may not choose to update all fields at once
     serializer = UserSerializer(data=data, instance=user, partial=True)
@@ -133,7 +134,7 @@ def update_user(user, request):
             raise SluglineAPIException('USER.COULD_NOT_UPDATE')
 
 
-@api_view(['POST'])
+@api_view(['PATCH'])
 @permission_classes([IsEditor])
 def update_generic_user_view(request, username):
     try:
@@ -142,7 +143,7 @@ def update_generic_user_view(request, username):
         raise SluglineAPIException('USER.DOES_NOT_EXIST')
 
 
-@api_view(['POST'])
+@api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
     if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
