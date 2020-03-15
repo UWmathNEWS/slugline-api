@@ -11,6 +11,7 @@ from rest_framework import serializers
 
 
 class SluglineUser(AbstractUser):
+    email = models.EmailField(blank=False)
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
 
