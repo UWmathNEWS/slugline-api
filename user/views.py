@@ -6,7 +6,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from user.models import SluglineUser, UserSerializer
+from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 
 class IsEditor(BasePermission):
@@ -67,7 +67,8 @@ def list_users_view(request):
 @permission_classes([IsEditor])
 def query_user_view(request, username):
     return Response({
-        'success': not SluglineUser.objects.filter(username=username).exists() and len(username) <= 150
+        'success': len(username) <= 150 and username.lower() not in FORBIDDEN_USERNAMES and
+                   not SluglineUser.objects.filter(username=username).exists()
     })
 
 

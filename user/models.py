@@ -10,6 +10,9 @@ from django.contrib.auth.password_validation import UserAttributeSimilarityValid
 from rest_framework import serializers
 
 
+FORBIDDEN_USERNAMES = {'admin', 'administrator', 'root', 'toor', 'sudo', 'sudoers'}
+
+
 class SluglineUser(AbstractUser):
     email = models.EmailField(blank=False)
     """Articles written by this user will use this name by default."""
@@ -29,7 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
     is_editor = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
-        if SluglineUser.objects.filter(username=validated_data.get('username', None)).exists():
+        if SluglineUser.objects.filter(username=validated_data.get('username', None)).exists() or \
+                validated_data.get('username', '').lower() in FORBIDDEN_USERNAMES:
             raise serializers.ValidationError({'username': ['USER.USERNAME.ALREADY_EXISTS']})
         user = SluglineUser.objects.create(**validated_data)
         user.set_password(validated_data['password'])
