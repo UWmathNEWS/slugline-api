@@ -156,6 +156,8 @@ def update_user_view(request):
 @permission_classes([IsEditor])
 def delete_user_view(request, username):
     try:
+        if request.user.username == username or SluglineUser.objects.get(username=username).is_editor:
+            raise Exception
         SluglineUser.objects.filter(username=username).delete()
         return Response({
             'success': True
