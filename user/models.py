@@ -73,16 +73,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         if 'password' in data:
             try:
-                user = self.instance or SluglineUser(**data)
-                password_validators = (
-                    MinimumLengthValidator(),
-                    NumericPasswordValidator(),
-                    CommonPasswordValidator(),
-                    UserAttributeSimilarityValidator(
-                        user_attributes=(*UserAttributeSimilarityValidator.DEFAULT_USER_ATTRIBUTES, 'writer_name')
-                    )
-                )
-                validate_password(data['password'], user=user, password_validators=password_validators)
+                current_attrs = UserSerializer(self.instance).data
+                current_attrs.update(data)
+                validate_password(data['password'], user=SluglineUser(**current_attrs))
             except ValidationError as err:
                 print(list(map(lambda e: (e.code, e.params), err.error_list)))
                 errors_list['password'] = list(
