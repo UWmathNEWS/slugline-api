@@ -21,10 +21,6 @@ class SluglineUser(AbstractUser):
         """Is this user an editor?"""
         return self.groups.filter(name='Editor').exists()
 
-    @is_editor.setter
-    def is_editor(self, value):
-        pass
-
 
 class UserSerializer(serializers.ModelSerializer):
     is_editor = serializers.BooleanField(default=False)
@@ -66,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
         if 'email' in data:
             try:
                 validate_email(data['email'])
-            except ValidationError as err:
+            except ValidationError:
                 errors_list['email'] = ['USER.EMAIL.INVALID']
 
         if 'password' in data:
@@ -75,7 +71,6 @@ class UserSerializer(serializers.ModelSerializer):
                 current_attrs.update(data)
                 validate_password(data['password'], user=SluglineUser(**current_attrs))
             except ValidationError as err:
-                print(list(map(lambda e: (e.code, e.params), err.error_list)))
                 errors_list['password'] = list(
                     map(lambda e: 'USER.' + e.code.replace('_', '.', 1).upper() +
                                   ('.' + ','.join(map(str, e.params.values())).replace(' ', '_') if e.params is not None

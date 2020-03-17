@@ -1,10 +1,11 @@
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.http.response import Http404
 
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from common.exceptions import SluglineAPIException
 from common.permissions import IsEditor
@@ -82,7 +83,7 @@ def update_user_view(request):
     return update_user(user=request.user, request=request)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(ModelViewSet):
     queryset = SluglineUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsEditor]
