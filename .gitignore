@@ -105,3 +105,6 @@ media/
 
 # Collected static files
 /static/
+
+# IDEA files
+.idea/
