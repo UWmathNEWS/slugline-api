@@ -137,9 +137,8 @@ class UserViewSet(ModelViewSet):
             raise SluglineAPIException('USER.COULD_NOT_DELETE')
 
     @action(detail=True)
-    def query(self, request, pk=None):
-        print(SluglineUser.objects.filter(username=pk).exists())
+    def query(self, request, username=None):
         return Response({
-            'success': len(pk) <= 150 and pk.lower() not in FORBIDDEN_USERNAMES and
-                       not SluglineUser.objects.filter(username=pk).exists()
+            'success': len(username) <= 150 and username.lower() not in FORBIDDEN_USERNAMES and
+                       not SluglineUser.objects.filter(username=username).exists()
         })
