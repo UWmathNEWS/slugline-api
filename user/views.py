@@ -44,25 +44,16 @@ def logout_view(request):
 
 
 @api_view(['GET'])
-def auth_view(request):
+def retrieve_user_view(request):
     if request.user is None or not request.user.is_authenticated:
         return Response({
-            'authenticated': False
+            'success': False
         })
     else:
         return Response({
-            'authenticated': True,
+            'success': True,
             'user': UserSerializer(request.user).data
         })
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def retrieve_user_view(request):
-    return Response({
-        'success': True,
-        'user': UserSerializer(request.user).data
-    })
 
 
 def update_user(user, request):
