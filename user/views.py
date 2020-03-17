@@ -3,24 +3,12 @@ from django.http.response import Http404
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.exceptions import APIException
 
+from common.exceptions import SluglineAPIException
+from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
-
-
-class IsEditor(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user and (request.user.is_editor or request.user.is_staff))
-
-
-class SluglineAPIException(APIException):
-    def __init__(self, detail):
-        super().__init__(detail={
-            'success': False,
-            'error': [detail] if isinstance(detail, str) else detail
-        })
 
 
 @api_view(['POST'])
@@ -133,14 +121,6 @@ class UserViewSet(viewsets.ModelViewSet):
         except SluglineUser.DoesNotExist:
             raise SluglineAPIException('USER.DOES_NOT_EXIST')
 
-    @action(detail=True)
-    def query(self, request, pk=None):
-        print(SluglineUser.objects.filter(username=pk).exists())
-        return Response({
-            'success': len(pk) <= 150 and pk.lower() not in FORBIDDEN_USERNAMES and
-                       not SluglineUser.objects.filter(username=pk).exists()
-        })
-
     def destroy(self, request, *args, **kwargs):
         try:
             if request.user.username == kwargs.get('username', '') or \
@@ -155,4 +135,10 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception:
             raise SluglineAPIException('USER.COULD_NOT_DELETE')
 
-
+    @action(detail=True)
+    def query(self, request, pk=None):
+        print(SluglineUser.objects.filter(username=pk).exists())
+        return Response({
+            'success': len(pk) <= 150 and pk.lower() not in FORBIDDEN_USERNAMES and
+                       not SluglineUser.objects.filter(username=pk).exists()
+        })
