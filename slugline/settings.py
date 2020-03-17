@@ -150,6 +150,6 @@ MEDIA_URL = '/media/'
 # Django Rest Framework settings
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'common.pagination.SluglinePagination',
     'PAGE_SIZE': 10
 }
