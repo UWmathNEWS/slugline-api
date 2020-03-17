@@ -1,16 +1,16 @@
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
 from user.views import *
+
+router = SimpleRouter()
+router.register('users', UserViewSet, 'users')
 
 urlpatterns = [
     path('login/', login_view),
     path('logout/', logout_view),
     path('auth/', auth_view),
-    path('user/update', update_user_view),
-    path('allusers', list_users_view),
-    path('createuser', create_user_view),
-    path('users/<str:username>', list_user_view),
-    path('users/<str:username>/query', query_user_view),
-    path('users/<str:username>/update', update_generic_user_view),
-    path('users/<str:username>/delete', delete_user_view)
+    path('user/', retrieve_user_view),
+    path('user/', update_user_view),
+    *router.urls
 ]

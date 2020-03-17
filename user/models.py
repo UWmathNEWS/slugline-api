@@ -4,8 +4,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.password_validation import UserAttributeSimilarityValidator,\
-    MinimumLengthValidator, CommonPasswordValidator, NumericPasswordValidator
 
 from rest_framework import serializers
 
@@ -80,7 +78,8 @@ class UserSerializer(serializers.ModelSerializer):
                 print(list(map(lambda e: (e.code, e.params), err.error_list)))
                 errors_list['password'] = list(
                     map(lambda e: 'USER.' + e.code.replace('_', '.', 1).upper() +
-                                  ('.' + ','.join(e.params.values()).replace(' ', '_') if e.params is not None else ''),
+                                  ('.' + ','.join(map(str, e.params.values())).replace(' ', '_') if e.params is not None
+                                   else ''),
                         err.error_list))
 
         if len(errors_list):

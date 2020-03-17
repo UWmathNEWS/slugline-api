@@ -1,7 +1,8 @@
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.http.response import Http404
 
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
@@ -56,53 +57,12 @@ def auth_view(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsEditor])
-def list_users_view(request):
-    start = int(request.GET.get('start', 0))
-    limit = int(request.GET.get('limit', 10))
-    return Response(map(lambda u: UserSerializer(u).data, SluglineUser.objects.all()[start:start+limit]))
-
-
-@api_view(['GET'])
-@permission_classes([IsEditor])
-def query_user_view(request, username):
+@permission_classes([IsAuthenticated])
+def retrieve_user_view(request):
     return Response({
-        'success': len(username) <= 150 and username.lower() not in FORBIDDEN_USERNAMES and
-                   not SluglineUser.objects.filter(username=username).exists()
+        'success': True,
+        'user': UserSerializer(request.user).data
     })
-
-
-@api_view(['GET'])
-@permission_classes([IsEditor])
-def list_user_view(request, username):
-    try:
-        return Response(UserSerializer(SluglineUser.objects.get(username=username)).data)
-    except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('USER.DOES_NOT_EXIST')
-
-
-@api_view(['PUT'])
-@permission_classes([IsEditor])
-def create_user_view(request):
-    if SluglineUser.objects.filter(username=request.data['username']).exists():
-        raise SluglineAPIException({'username': ['USER.USERNAME.ALREADY_EXISTS']})
-    # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
-    if len(request.data['username']) > 150:
-        raise SluglineAPIException({'username': ['USER.USERNAME.TOO_LONG']})
-
-    serializer = UserSerializer(data=request.data)
-    serializer.is_valid()
-    if len(serializer.errors):
-        raise SluglineAPIException(serializer.errors)
-    else:
-        try:
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED, data={
-                'success': True,
-                'user': serializer.data
-            })
-        except Exception:
-            raise SluglineAPIException('USER.COULD_NOT_CREATE')
 
 
 def update_user(user, request):
@@ -136,15 +96,6 @@ def update_user(user, request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsEditor])
-def update_generic_user_view(request, username):
-    try:
-        return update_user(user=SluglineUser.objects.get(username=username), request=request)
-    except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('USER.DOES_NOT_EXIST')
-
-
-@api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
     if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
@@ -152,17 +103,65 @@ def update_user_view(request):
     return update_user(user=request.user, request=request)
 
 
-@api_view(['DELETE'])
-@permission_classes([IsEditor])
-def delete_user_view(request, username):
-    try:
-        if request.user.username == username or SluglineUser.objects.get(username=username).is_editor:
-            raise Exception
-        SluglineUser.objects.filter(username=username).delete()
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = SluglineUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsEditor]
+    lookup_field = 'username'
+
+    def create(self, request, *args, **kwargs):
+        if SluglineUser.objects.filter(username=request.data['username']).exists():
+            raise SluglineAPIException({'username': ['USER.USERNAME.ALREADY_EXISTS']})
+        # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
+        if len(request.data['username']) > 150:
+            raise SluglineAPIException({'username': ['USER.USERNAME.TOO_LONG']})
+
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid()
+        if len(serializer.errors):
+            raise SluglineAPIException(serializer.errors)
+        else:
+            try:
+                serializer.save()
+                return Response(status=status.HTTP_201_CREATED, data={
+                    'success': True,
+                    'user': serializer.data
+                })
+            except Exception:
+                raise SluglineAPIException('USER.COULD_NOT_CREATE')
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            return super(UserViewSet, self).retrieve(request, *args, **kwargs)
+        except Http404:
+            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return update_user(user=SluglineUser.objects.get(username=kwargs.get('username', '')), request=request)
+        except SluglineUser.DoesNotExist:
+            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+
+    @action(detail=True)
+    def query(self, request, pk=None):
+        print(SluglineUser.objects.filter(username=pk).exists())
         return Response({
-            'success': True
+            'success': len(pk) <= 150 and pk.lower() not in FORBIDDEN_USERNAMES and
+                       not SluglineUser.objects.filter(username=pk).exists()
         })
-    except SluglineUser.DoesNotExist:
-        raise SluglineAPIException('USER.DOES_NOT_EXIST')
-    except Exception:
-        raise SluglineAPIException('USER.COULD_NOT_DELETE')
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            if request.user.username == kwargs.get('username', '') or \
+                    SluglineUser.objects.get(username=kwargs.get('username', '')).is_editor:
+                raise Exception
+            super(UserViewSet, self).destroy(request, *args, **kwargs)
+            return Response({
+                'success': True
+            })
+        except Http404:
+            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+        except Exception:
+            raise SluglineAPIException('USER.COULD_NOT_DELETE')
+
+
