@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from common.exceptions import SluglineAPIException
+from common.exceptions import APIException
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
@@ -17,10 +17,10 @@ def login_view(request):
     username = request.data.get('username', None)
     password = request.data.get('password', None)
     if username is None or password is None:
-        raise SluglineAPIException('AUTH.CREDENTIALS_NONEXISTENT')
+        raise APIException('AUTH.CREDENTIALS_NONEXISTENT')
     user = authenticate(username=username, password=password)
     if user is None:
-        raise SluglineAPIException('AUTH.CREDENTIALS_INVALID')
+        raise APIException('AUTH.CREDENTIALS_INVALID')
     login(request, user)
     return Response(UserSerializer(user).data)
 
@@ -54,14 +54,14 @@ def update_user(user, request):
         else:
             password = data.get('cur_password', '')
             if not user.check_password(password):
-                raise SluglineAPIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
+                raise APIException({'user': ['USER.PASSWORD.CURRENT_INCORRECT']})
             del data['cur_password']
 
     # We set the partial flag as the front-end may not choose to update all fields at once
     serializer = UserSerializer(data=data, instance=user, partial=True)
     serializer.is_valid()
     if len(serializer.errors):
-        raise SluglineAPIException(serializer.errors)
+        raise APIException(serializer.errors)
     else:
         try:
             updated_user = serializer.save()
@@ -72,14 +72,14 @@ def update_user(user, request):
                 'user': serializer.data
             })
         except Exception:
-            raise SluglineAPIException('USER.COULD_NOT_UPDATE')
+            raise APIException('USER.COULD_NOT_UPDATE')
 
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_user_view(request):
     if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
-        raise SluglineAPIException('USER.INSUFFICIENT_PRIVILEGES')
+        raise APIException('USER.INSUFFICIENT_PRIVILEGES')
     return update_user(user=request.user, request=request)
 
 
@@ -91,15 +91,15 @@ class UserViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if SluglineUser.objects.filter(username=request.data['username']).exists():
-            raise SluglineAPIException({'username': ['USER.USERNAME.ALREADY_EXISTS']})
+            raise APIException({'username': ['USER.USERNAME.ALREADY_EXISTS']})
         # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
         if len(request.data['username']) > 150:
-            raise SluglineAPIException({'username': ['USER.USERNAME.TOO_LONG']})
+            raise APIException({'username': ['USER.USERNAME.TOO_LONG']})
 
         serializer = UserSerializer(data=request.data)
         serializer.is_valid()
         if len(serializer.errors):
-            raise SluglineAPIException(serializer.errors)
+            raise APIException(serializer.errors)
         else:
             try:
                 serializer.save()
@@ -108,33 +108,33 @@ class UserViewSet(ModelViewSet):
                     'user': serializer.data
                 })
             except Exception:
-                raise SluglineAPIException('USER.COULD_NOT_CREATE')
+                raise APIException('USER.COULD_NOT_CREATE')
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            return super(UserViewSet, self).retrieve(request, *args, **kwargs)
+            return super().retrieve(request, *args, **kwargs)
         except Http404:
-            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+            raise APIException('USER.DOES_NOT_EXIST')
 
     def update(self, request, *args, **kwargs):
         try:
             return update_user(user=SluglineUser.objects.get(username=kwargs.get('username', '')), request=request)
         except SluglineUser.DoesNotExist:
-            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+            raise APIException('USER.DOES_NOT_EXIST')
 
     def destroy(self, request, *args, **kwargs):
         try:
             if request.user.username == kwargs.get('username', '') or \
                     SluglineUser.objects.get(username=kwargs.get('username', '')).is_editor:
                 raise Exception
-            super(UserViewSet, self).destroy(request, *args, **kwargs)
+            super().destroy(request, *args, **kwargs)
             return Response({
                 'success': True
             })
         except Http404:
-            raise SluglineAPIException('USER.DOES_NOT_EXIST')
+            raise APIException('USER.DOES_NOT_EXIST')
         except Exception:
-            raise SluglineAPIException('USER.COULD_NOT_DELETE')
+            raise APIException('USER.COULD_NOT_DELETE')
 
     @action(detail=True)
     def query(self, request, username=None):
