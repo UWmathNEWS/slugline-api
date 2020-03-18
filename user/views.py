@@ -4,11 +4,11 @@ from django.http.response import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.exceptions import APIException
 from common.permissions import IsEditor
+from common.response import Response
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 
@@ -35,14 +35,9 @@ def logout_view(request):
 @api_view(['GET'])
 def retrieve_user_view(request):
     if request.user is None or not request.user.is_authenticated:
-        return Response({
-            'success': False
-        })
+        return Response(success=False)
     else:
-        return Response({
-            'success': True,
-            'user': UserSerializer(request.user).data
-        })
+        return Response(UserSerializer(request.user).data)
 
 
 def update_user(user, request):
@@ -67,10 +62,7 @@ def update_user(user, request):
             updated_user = serializer.save()
             if 'password' in data:
                 update_session_auth_hash(request, updated_user)
-            return Response({
-                'success': True,
-                'user': serializer.data
-            })
+            return Response(serializer.data)
         except Exception:
             raise APIException('USER.COULD_NOT_UPDATE')
 
@@ -103,16 +95,13 @@ class UserViewSet(ModelViewSet):
         else:
             try:
                 serializer.save()
-                return Response(status=status.HTTP_201_CREATED, data={
-                    'success': True,
-                    'user': serializer.data
-                })
+                return Response(status=status.HTTP_201_CREATED, data=serializer.data)
             except Exception:
                 raise APIException('USER.COULD_NOT_CREATE')
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            return super().retrieve(request, *args, **kwargs)
+            return Response(super().retrieve(request, *args, **kwargs).data)
         except Http404:
             raise APIException('USER.DOES_NOT_EXIST')
 
@@ -127,10 +116,7 @@ class UserViewSet(ModelViewSet):
             if request.user.username == kwargs.get('username', '') or \
                     SluglineUser.objects.get(username=kwargs.get('username', '')).is_editor:
                 raise Exception
-            super().destroy(request, *args, **kwargs)
-            return Response({
-                'success': True
-            })
+            return Response(super().destroy(request, *args, **kwargs).data)
         except Http404:
             raise APIException('USER.DOES_NOT_EXIST')
         except Exception:
@@ -138,7 +124,5 @@ class UserViewSet(ModelViewSet):
 
     @action(detail=True)
     def query(self, request, username=None):
-        return Response({
-            'success': len(username) <= 150 and username.lower() not in FORBIDDEN_USERNAMES and
-                       not SluglineUser.objects.filter(username=username).exists()
-        })
+        return Response(success=len(username) <= 150 and username.lower() not in FORBIDDEN_USERNAMES and
+                        not SluglineUser.objects.filter(username=username).exists())
