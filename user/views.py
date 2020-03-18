@@ -1,7 +1,7 @@
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.http.response import Http404
 
-from rest_framework import status
+from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
@@ -32,14 +32,6 @@ def logout_view(request):
     return Response()
 
 
-@api_view(['GET'])
-def retrieve_user_view(request):
-    if request.user is None or not request.user.is_authenticated:
-        return Response(success=False)
-    else:
-        return Response(UserSerializer(request.user).data)
-
-
 def update_user(user, request):
     data = request.data
     if 'password' in data:
@@ -67,12 +59,19 @@ def update_user(user, request):
             raise APIException('USER.COULD_NOT_UPDATE')
 
 
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def update_user_view(request):
-    if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
-        raise APIException('USER.INSUFFICIENT_PRIVILEGES')
-    return update_user(user=request.user, request=request)
+@api_view(['GET', 'PATCH'])
+def single_user_view(request):
+    is_authenticated = IsAuthenticated().has_permission(request, None)
+    if request.method == 'GET':
+        if is_authenticated:
+            return Response(UserSerializer(request.user).data)
+        else:
+            return Response(success=False)
+    elif is_authenticated:
+        if not request.user.is_staff and not request.user.is_editor and any(['is_editor' in request.data]):
+            raise APIException('USER.INSUFFICIENT_PRIVILEGES')
+        return update_user(user=request.user, request=request)
+    raise exceptions.MethodNotAllowed(request.method)
 
 
 class UserViewSet(ModelViewSet):
