@@ -60,7 +60,7 @@ def update_user(user, request):
 
 
 @api_view(['GET', 'PATCH'])
-def single_user_view(request):
+def current_user_view(request):
     is_authenticated = IsAuthenticated().has_permission(request, None)
     if request.method == 'GET':
         if is_authenticated:
