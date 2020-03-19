@@ -38,9 +38,19 @@ class Issue(models.Model):
         ordering = ["-volume_num", "-issue_num"]
 
 
+class ArticleManager(models.Manager):
+    def wordpress_articles(self):
+        return self.exclude(content_wordpress=None)
+
+    def slate_articles(self):
+        return self.exclude(content_slate=None)
+
+
 class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
     """
+
+    objects = ArticleManager()
 
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -48,9 +58,11 @@ class Article(models.Model):
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
 
-    content_html = models.TextField()
-
-    is_wordpress = models.BooleanField(default=False)
+    """Since we can get articles from data sources, we have both here.
+    One and only one of these can be non-null.
+    """
+    content_wordpress = models.TextField(null=True)
+    content_slate = models.TextField(null=True)
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
@@ -60,8 +72,17 @@ class Article(models.Model):
 
     user = models.ForeignKey(SluglineUser, on_delete=models.SET_NULL, null=True)
 
+    def is_wordpress(self):
+        return self.content_wordpress != None
+
     def render_to_html(self):
-        return self.content_html
+        """Returns this article converted to HTML for web display."""
+        if self.content_wordpress != None:
+            return self.content_wordpress
+        else:
+            raise NotImplementedError(
+                "render_to_html not implemented for Slate articles."
+            )
 
     def render_to_xml(self):
         """Returns this article converted to InDesign-compatible XML
@@ -75,3 +96,4 @@ class Article(models.Model):
 
 admin.site.register(Issue)
 admin.site.register(Article)
+
