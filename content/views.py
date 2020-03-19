@@ -15,15 +15,16 @@ class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
 
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=["GET"])
     def latest(self, request):
         latest = Issue.objects.latest_issue()
         return Response(IssueSerializer(latest).data)
 
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=["GET"])
     def articles(self, request, pk=None):
         issue_articles = Article.objects.filter(issue__pk=pk)
         return Response(ArticleSerializer(issue_articles, many=True).data)
+
 
 class ArticleViewSet(ModelViewSet):
 

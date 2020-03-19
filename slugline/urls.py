@@ -27,10 +27,9 @@ import user.urls
 import user.views
 
 urlpatterns = [
-    path('api/', include(content.urls)),
-    path('api/', include(user.urls)),
-  
-    path('admin/', admin.site.urls),
+    path("api/", include(content.urls)),
+    path("api/", include(user.urls)),
+    path("admin/", admin.site.urls),
 ]
 
 if settings.DEBUG:

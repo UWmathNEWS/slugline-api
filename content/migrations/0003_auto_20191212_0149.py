@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0002_article_is_wordpress'),
+        ("content", "0002_article_is_wordpress"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='article',
-            name='is_article_of_issue',
+            model_name="article",
+            name="is_article_of_issue",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='is_promo',
+            model_name="article",
+            name="is_promo",
             field=models.BooleanField(default=False),
         ),
     ]
