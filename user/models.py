@@ -21,6 +21,12 @@ class SluglineUser(AbstractUser):
         """Is this user an editor?"""
         return self.groups.filter(name="Editor").exists()
 
+    # We write a setter as we construct temporary users when doing password validation, and sometimes editor information
+    # is part of the data.
+    @is_editor.setter
+    def is_editor(self, value):
+        pass
+
 
 class UserSerializer(serializers.ModelSerializer):
     is_editor = serializers.BooleanField(default=False)

@@ -1,11 +1,13 @@
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException as _APIException
 
 
-class SluglineAPIException(APIException):
-    def __init__(self, detail):
-        super().__init__(
-            detail={
-                "success": False,
-                "error": [detail] if isinstance(detail, str) else detail,
-            }
-        )
+class APIException(_APIException):
+    def __init__(self, detail, **kwargs):
+        if isinstance(detail, str) or isinstance(detail, list):
+            super().__init__(
+                detail={"detail": [detail] if isinstance(detail, str) else detail},
+                **kwargs
+            )
+        else:
+            super().__init__(detail=detail, **kwargs)
+

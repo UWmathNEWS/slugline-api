@@ -4,14 +4,13 @@ from django.http import Http404
 from django.db.models.functions import Length
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
-from rest_framework.response import Response
 
+from common.response import Response
 from content.models import Issue, Article
 from content.serializers import IssueSerializer, ArticleSerializer
 
 
 class IssueViewSet(ModelViewSet):
-
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
 
@@ -27,6 +26,5 @@ class IssueViewSet(ModelViewSet):
 
 
 class ArticleViewSet(ModelViewSet):
-
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
