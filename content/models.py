@@ -5,10 +5,11 @@ from django.utils.html import strip_tags
 
 from user.models import SluglineUser
 
-class IssueManager(models.Manager):
 
+class IssueManager(models.Manager):
     def latest_issue(self):
         return self.all().first()
+
 
 class Issue(models.Model):
     """An issue of the publication.
@@ -21,20 +22,21 @@ class Issue(models.Model):
     volume_num = models.IntegerField()
     issue_num = models.IntegerField()
 
-    pdf = models.FileField(upload_to='issue_pdfs/', null=True)
+    pdf = models.FileField(upload_to="issue_pdfs/", null=True)
 
     def short_name(self):
-        return f'v{self.volume_num}i{self.issue_num}'
+        return f"v{self.volume_num}i{self.issue_num}"
 
     def long_name(self):
-        return f'Volume {self.volume_num} Issue {self.issue_num} '
+        return f"Volume {self.volume_num} Issue {self.issue_num} "
 
     def __str__(self):
         return self.short_name()
 
     class Meta:
 
-        ordering = ['-volume_num', '-issue_num']
+        ordering = ["-volume_num", "-issue_num"]
+
 
 class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
@@ -65,10 +67,11 @@ class Article(models.Model):
         """Returns this article converted to InDesign-compatible XML
         for print export. 
         """
-        raise NotImplementedError('render_to_xml not implemented')
+        raise NotImplementedError("render_to_xml not implemented")
 
     def __str__(self):
-        return f'{self.title} by {self.author}'
-    
+        return f"{self.title} by {self.author}"
+
+
 admin.site.register(Issue)
 admin.site.register(Article)

@@ -4,11 +4,11 @@ from rest_framework.routers import SimpleRouter
 from user.views import *
 
 router = SimpleRouter()
-router.register('users', UserViewSet, 'users')
+router.register("users", UserViewSet, "users")
 
 urlpatterns = [
-    path('login/', login_view),
-    path('logout/', logout_view),
-    path('me/', current_user_view),
-    *router.urls
+    path("login/", login_view),
+    path("logout/", logout_view),
+    path("me/", current_user_view),
+    *router.urls,
 ]

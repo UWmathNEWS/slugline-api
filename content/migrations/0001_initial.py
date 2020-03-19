@@ -8,34 +8,52 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Issue',
+            name="Issue",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('publish_date', models.DateField(null=True)),
-                ('volume_num', models.IntegerField()),
-                ('issue_num', models.IntegerField()),
-                ('pdf', models.FileField(null=True, upload_to='issue_pdfs/')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("publish_date", models.DateField(null=True)),
+                ("volume_num", models.IntegerField()),
+                ("issue_num", models.IntegerField()),
+                ("pdf", models.FileField(null=True, upload_to="issue_pdfs/")),
             ],
-            options={
-                'ordering': ['-volume_num', '-issue_num'],
-            },
+            options={"ordering": ["-volume_num", "-issue_num"],},
         ),
         migrations.CreateModel(
-            name='Article',
+            name="Article",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('sub_title', models.CharField(blank=True, max_length=255)),
-                ('author', models.CharField(blank=True, max_length=255)),
-                ('content_html', models.TextField()),
-                ('is_article_of_issue', models.BooleanField()),
-                ('is_promo', models.BooleanField()),
-                ('issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='content.Issue')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("sub_title", models.CharField(blank=True, max_length=255)),
+                ("author", models.CharField(blank=True, max_length=255)),
+                ("content_html", models.TextField()),
+                ("is_article_of_issue", models.BooleanField()),
+                ("is_promo", models.BooleanField()),
+                (
+                    "issue",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="content.Issue"
+                    ),
+                ),
             ],
         ),
     ]
