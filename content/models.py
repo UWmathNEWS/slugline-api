@@ -61,8 +61,8 @@ class Article(models.Model):
     """Since we can get articles from data sources, we have both here.
     One and only one of these can be non-null.
     """
-    content_wordpress = models.TextField(null=True)
-    content_slate = models.TextField(null=True)
+    content_wordpress = models.TextField(null=True, blank=True)
+    content_slate = models.TextField(null=True, blank=True)
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
@@ -96,4 +96,3 @@ class Article(models.Model):
 
 admin.site.register(Issue)
 admin.site.register(Article)
-
