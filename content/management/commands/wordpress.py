@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup, NavigableString, Tag
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.text import slugify
+from user.models import SluglineUser
 
 import re
 import copy
@@ -109,7 +110,7 @@ class Command(BaseCommand):
         author_tag = new_soup.contents[-1].extract()
         return new_soup.prettify(), author_tag.text
 
-    def article_from_tag(self, article_tag):
+    def article_from_tag(self, article_tag, user):
         title = article_tag.find("title").text or ""
         content = article_tag.find("content:encoded", XML_NS).text
         post_tags = article_tag.findall(r'.//category[@domain="post_tag"]')
@@ -140,19 +141,27 @@ class Command(BaseCommand):
             content_raw=content_html,
             issue=issue,
             article_type=Article.ArticleType.Wordpress,
-            user=None,
+            user=user,
         )
 
     def handle(self, *args, **options):
         self.stdout.write("WARNING: This will delete all existing Wordpress articles!")
         self.stdout.write("Backup the database before continuing.")
         input("Press ENTER to continue...")
+        # Check if the admin user exists
+        try:
+            admin_user = SluglineUser.objects.get(username="admin", is_superuser=True)
+        except SluglineUser.DoesNotExist:
+            self.stdout.write(
+                'No superuser with the username "admin" was found. Create one first.'
+            )
+            return
         # Delete existing Wordpress articles
         Article.objects.wordpress_articles().delete()
         file_name = options["dump_file"]
         tree = ETree.parse(file_name)
         article_tags = tree.findall(".//item")
         articles = filter(
-            None, map(lambda tag: self.article_from_tag(tag), article_tags)
+            None, map(lambda tag: self.article_from_tag(tag, admin_user), article_tags)
         )
         Article.objects.bulk_create(articles)
