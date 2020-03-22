@@ -28,8 +28,10 @@ class ArticleSerializer(serializers.ModelSerializer):
             "sub_title",
             "author",
             "html",
+            "content_raw",
             "is_article_of_issue",
             "is_promo",
             "issue",
             "user",
         )
+        read_only_fields = ["html"]

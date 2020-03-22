@@ -40,15 +40,19 @@ class Issue(models.Model):
 
 class ArticleManager(models.Manager):
     def wordpress_articles(self):
-        return self.exclude(content_wordpress=None)
+        return self.filter(article_type=Article.ArticleType.Wordpress)
 
     def slate_articles(self):
-        return self.exclude(content_slate=None)
+        return self.filter(article_type=Article.ArticleType.Slate)
 
 
 class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
     """
+
+    class ArticleType(models.TextChoices):
+        Slate = "SLATE"
+        Wordpress = "WORDPRESS"
 
     objects = ArticleManager()
 
@@ -58,11 +62,12 @@ class Article(models.Model):
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
 
-    """Since we can get articles from data sources, we have both here.
-    One and only one of these can be non-null.
+    content_raw = models.TextField()
+
+    """Articles come from multiple data sources, so we have a type variable to 
+    discriminate between them.
     """
-    content_wordpress = models.TextField(null=True, blank=True)
-    content_slate = models.TextField(null=True, blank=True)
+    article_type = models.CharField(max_length=16, choices=ArticleType.choices)
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
@@ -73,12 +78,15 @@ class Article(models.Model):
     user = models.ForeignKey(SluglineUser, on_delete=models.SET_NULL, null=True)
 
     def is_wordpress(self):
-        return self.content_wordpress != None
+        return self.article_type == Article.ArticleType.Wordpress
+
+    def is_slate(self):
+        return self.article_type == Article.ArticleType.Slate
 
     def render_to_html(self):
         """Returns this article converted to HTML for web display."""
-        if self.content_wordpress != None:
-            return self.content_wordpress
+        if self.is_wordpress():
+            return self.content_raw
         else:
             raise NotImplementedError(
                 "render_to_html not implemented for Slate articles."

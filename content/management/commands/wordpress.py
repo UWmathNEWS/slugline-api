@@ -137,8 +137,9 @@ class Command(BaseCommand):
             title=title,
             slug=slugify(title),
             author=author,
-            content_wordpress=content_html,
+            content_raw=content_html,
             issue=issue,
+            article_type=Article.ArticleType.Wordpress,
             user=None,
         )
 
