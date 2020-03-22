@@ -3,7 +3,8 @@ from django.views.generic import ListView
 from django.http import Http404
 from django.db.models.functions import Length
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from common.response import Response
 from content.models import Issue, Article
@@ -28,3 +29,13 @@ class IssueViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
+
+
+class UserArticleViewSet(ModelViewSet):
+    """A viewset that returns just the articles for the request's user."""
+
+    serializer_class = ArticleSerializer
+
+    @permission_classes([IsAuthenticated])
+    def get_queryset(self):
+        return Article.objects.filter(user=self.request.user)
