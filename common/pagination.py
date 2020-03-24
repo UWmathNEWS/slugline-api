@@ -1,7 +1,6 @@
 from urllib.parse import urlparse, urlunparse
 
 from rest_framework.pagination import LimitOffsetPagination
-from common.response import Response
 
 
 def to_relative_url(url):
@@ -19,9 +18,6 @@ def to_relative_url(url):
 
 
 class SluglinePagination(LimitOffsetPagination):
-    def get_paginated_response(self, data):
-        return super(SluglinePagination, self).get_paginated_response(data)
-
     def get_next_link(self):
         link = super().get_next_link()
         # remove the domain

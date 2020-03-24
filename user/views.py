@@ -2,13 +2,13 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.http.response import Http404
 
 from rest_framework import status, exceptions
+from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from common.exceptions import APIException
 from common.permissions import IsEditor
-from common.response import Response
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 
@@ -64,7 +64,9 @@ def current_user_view(request):
     is_authenticated = IsAuthenticated().has_permission(request, None)
     if request.method == "GET":
         if is_authenticated:
-            return Response(UserSerializer(request.user).data)
+            resp = Response(UserSerializer(request.user).data)
+            print(resp.data)
+            return resp
         else:
             return Response(success=False)
     elif is_authenticated:
