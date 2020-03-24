@@ -98,13 +98,13 @@ class UserViewSet(ModelViewSet):
         else:
             try:
                 serializer.save()
-                return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception:
                 raise APIException("USER.COULD_NOT_CREATE")
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            return Response(super().retrieve(request, *args, **kwargs).data)
+            return super().retrieve(request, *args, **kwargs)
         except Http404:
             raise APIException("USER.DOES_NOT_EXIST")
 
@@ -126,7 +126,7 @@ class UserViewSet(ModelViewSet):
                 ).is_editor
             ):
                 raise Exception
-            return Response(super().destroy(request, *args, **kwargs).data)
+            return super().destroy(request, *args, **kwargs)
         except Http404:
             raise APIException("USER.DOES_NOT_EXIST")
         except Exception:

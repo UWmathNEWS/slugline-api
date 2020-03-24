@@ -20,9 +20,7 @@ def to_relative_url(url):
 
 class SluglinePagination(LimitOffsetPagination):
     def get_paginated_response(self, data):
-        return Response(
-            super(SluglinePagination, self).get_paginated_response(data).data
-        )
+        return super(SluglinePagination, self).get_paginated_response(data)
 
     def get_next_link(self):
         link = super().get_next_link()
