@@ -149,7 +149,6 @@ MEDIA_URL = "/media/"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "common.pagination.SluglinePagination",
     "PAGE_SIZE": 10,
-    "EXCEPTION_HANDLER": "common.views.slugline_exception_handler",
     "DEFAULT_RENDERER_CLASSES": [
         "common.renderers.SluglineRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",

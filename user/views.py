@@ -3,12 +3,12 @@ from django.http.response import Http404
 
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from common.exceptions import APIException
 from common.permissions import IsEditor
-from common.response import Response
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 
@@ -66,7 +66,7 @@ def current_user_view(request):
         if is_authenticated:
             return Response(UserSerializer(request.user).data)
         else:
-            return Response(success=False)
+            return Response(None)
     elif is_authenticated:
         if (
             not request.user.is_staff

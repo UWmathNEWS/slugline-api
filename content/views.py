@@ -2,10 +2,10 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from django.http import Http404
 from django.db.models.functions import Length
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
-from common.response import Response
 from content.models import Issue, Article
 from content.serializers import IssueSerializer, ArticleSerializer
 
