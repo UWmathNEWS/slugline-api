@@ -61,6 +61,7 @@ def update_user(user, request):
 
 @api_view(["GET", "PATCH"])
 def current_user_view(request):
+    raise APIException("EXCEPTION")
     is_authenticated = IsAuthenticated().has_permission(request, None)
     if request.method == "GET":
         if is_authenticated:
