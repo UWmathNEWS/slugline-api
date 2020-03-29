@@ -135,9 +135,9 @@ class Command(BaseCommand):
             title=title,
             slug=slugify(title),
             author=author,
-            content_html=content_html,
+            article_type=Article.Type.WORDPRESS,
+            content_raw=content_html,
             issue=issue,
-            is_wordpress=True,
             user=None,
         )
 
@@ -146,7 +146,7 @@ class Command(BaseCommand):
         self.stdout.write("Backup the database before continuing.")
         input("Press ENTER to continue...")
         # Delete existing Wordpress articles
-        Article.objects.filter(is_wordpress=True).delete()
+        Article.objects.filter(article_type=Article.Type.WORDPRESS).delete()
         file_name = options["dump_file"]
         tree = ETree.parse(file_name)
         article_tags = tree.findall(".//item")
