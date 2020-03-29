@@ -4,6 +4,9 @@ from rest_framework.renderers import JSONRenderer
 class SluglineRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if renderer_context["response"].exception:
+            # convert singular detail arguments into arrays
+            if "detail" in data and isinstance(data["detail"], str):
+                data["detail"] = [data["detail"]]
             rendered_json = {
                 "success": False,
                 "error": data,
