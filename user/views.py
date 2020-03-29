@@ -3,11 +3,11 @@ from django.http.response import Http404
 
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from common.exceptions import APIException
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
@@ -60,15 +60,11 @@ def update_user(user, request):
 
 
 @api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
 def current_user_view(request):
-    raise APIException("EXCEPTION")
-    is_authenticated = IsAuthenticated().has_permission(request, None)
     if request.method == "GET":
-        if is_authenticated:
-            return Response(UserSerializer(request.user).data)
-        else:
-            return Response(None)
-    elif is_authenticated:
+        return Response(UserSerializer(request.user).data)
+    else:
         if (
             not request.user.is_staff
             and not request.user.is_editor
@@ -76,7 +72,6 @@ def current_user_view(request):
         ):
             raise APIException("USER.INSUFFICIENT_PRIVILEGES")
         return update_user(user=request.user, request=request)
-    raise exceptions.MethodNotAllowed(request.method)
 
 
 class UserViewSet(ModelViewSet):
