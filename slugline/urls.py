@@ -20,7 +20,6 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from django.shortcuts import render
 
-import common.views
 import content.urls
 import content.views
 import user.urls
