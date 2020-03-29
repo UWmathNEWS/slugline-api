@@ -60,14 +60,11 @@ def update_user(user, request):
 
 
 @api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
 def current_user_view(request):
-    is_authenticated = IsAuthenticated().has_permission(request, None)
     if request.method == "GET":
-        if is_authenticated:
-            return Response(UserSerializer(request.user).data)
-        else:
-            return Response(None)
-    elif is_authenticated:
+        return Response(UserSerializer(request.user).data)
+    else:
         if (
             not request.user.is_staff
             and not request.user.is_editor
@@ -75,7 +72,6 @@ def current_user_view(request):
         ):
             raise APIException("USER.INSUFFICIENT_PRIVILEGES")
         return update_user(user=request.user, request=request)
-    raise exceptions.MethodNotAllowed(request.method)
 
 
 class UserViewSet(ModelViewSet):
