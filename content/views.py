@@ -3,11 +3,17 @@ from django.views.generic import ListView
 from django.http import Http404
 from django.db.models.functions import Length
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
 
 from content.models import Issue, Article
-from content.serializers import IssueSerializer, ArticleSerializer
+from content.serializers import (
+    IssueSerializer,
+    ArticleSerializer,
+    ArticleContentSerializer,
+    ArticleHTMLSerializer,
+)
 
 
 class IssueViewSet(ModelViewSet):
@@ -28,3 +34,13 @@ class IssueViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
+
+
+class ArticleContentViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+    queryset = Article.objects.all()
+    serializer_class = ArticleContentSerializer
+
+
+class ArticleHTMLViewSet(GenericViewSet, RetrieveModelMixin):
+    queryset = Article.objects.all()
+    serializer_class = ArticleContentSerializer

@@ -16,9 +16,6 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-
-    html = serializers.CharField(read_only=True, source="render_to_html")
-
     class Meta:
         model = Article
         fields = (
@@ -27,11 +24,24 @@ class ArticleSerializer(serializers.ModelSerializer):
             "slug",
             "sub_title",
             "author",
-            "content_raw",
             "article_type",
-            "html",
             "is_article_of_issue",
             "is_promo",
             "issue",
             "user",
         )
+
+
+class ArticleContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ("content_raw",)
+
+
+class ArticleHTMLSerializer(serializers.ModelSerializer):
+
+    html = serializers.CharField(source="render_to_html", read_only=True)
+
+    class Meta:
+        model = Article
+        fields = ("html",)
