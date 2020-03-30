@@ -136,7 +136,7 @@ class UserViewSet(ModelViewSet):
             SluglineUser.objects.filter(username=username).exists()
             or username.lower() in FORBIDDEN_USERNAMES
         ):
-            raise ValidationError({"username": "USER.ALREADY_EXISTS"})
+            raise ValidationError({"username": ["USER.USERNAME.ALREADY_EXISTS"]})
         if len(username) > 150:
-            raise ValidationError({"username": "USER.TOO_LONG"})
+            raise ValidationError({"username": ["USER.USERNAME.TOO_LONG"]})
         return Response(None)
