@@ -3,7 +3,7 @@ from django.http.response import Http404
 
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
@@ -130,8 +130,11 @@ class UserViewSet(ModelViewSet):
 
     @action(detail=True)
     def query(self, request, username=None):
-        return Response(
-            success=len(username) <= 150
-            and username.lower() not in FORBIDDEN_USERNAMES
-            and not SluglineUser.objects.filter(username=username).exists()
-        )
+        if (
+            SluglineUser.objects.filter(username=username).exists()
+            or username.lower() in FORBIDDEN_USERNAMES
+        ):
+            raise ValidationError({"username": "USER.ALREADY_EXISTS"})
+        if len(username) > 150:
+            raise ValidationError({"username": "USER.TOO_LONG"})
+        return Response(None)
