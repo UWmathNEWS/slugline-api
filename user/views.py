@@ -61,7 +61,7 @@ def update_user(user, request):
 
 @api_view(["GET", "PATCH"])
 def current_user_view(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         if request.method == "GET":
             return Response(UserSerializer(request.user).data)
         else:
