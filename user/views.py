@@ -3,12 +3,12 @@ from django.http.response import Http404
 
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.exceptions import APIException, ValidationError
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from common.exceptions import APIException
 from common.permissions import IsEditor
-from common.response import Response
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 
@@ -61,21 +61,19 @@ def update_user(user, request):
 
 @api_view(["GET", "PATCH"])
 def current_user_view(request):
-    is_authenticated = IsAuthenticated().has_permission(request, None)
-    if request.method == "GET":
-        if is_authenticated:
+    if request.user.is_authenticated:
+        if request.method == "GET":
             return Response(UserSerializer(request.user).data)
         else:
-            return Response(success=False)
-    elif is_authenticated:
-        if (
-            not request.user.is_staff
-            and not request.user.is_editor
-            and any(["is_editor" in request.data])
-        ):
-            raise APIException("USER.INSUFFICIENT_PRIVILEGES")
-        return update_user(user=request.user, request=request)
-    raise exceptions.MethodNotAllowed(request.method)
+            if (
+                not request.user.is_staff
+                and not request.user.is_editor
+                and any(["is_editor" in request.data])
+            ):
+                raise APIException("USER.INSUFFICIENT_PRIVILEGES")
+            return update_user(user=request.user, request=request)
+    else:
+        return Response(None)
 
 
 class UserViewSet(ModelViewSet):
@@ -134,8 +132,11 @@ class UserViewSet(ModelViewSet):
 
     @action(detail=True)
     def query(self, request, username=None):
-        return Response(
-            success=len(username) <= 150
-            and username.lower() not in FORBIDDEN_USERNAMES
-            and not SluglineUser.objects.filter(username=username).exists()
-        )
+        if (
+            SluglineUser.objects.filter(username=username).exists()
+            or username.lower() in FORBIDDEN_USERNAMES
+        ):
+            raise ValidationError({"username": ["USER.USERNAME.ALREADY_EXISTS"]})
+        if len(username) > 150:
+            raise ValidationError({"username": ["USER.USERNAME.TOO_LONG"]})
+        return Response(None)
