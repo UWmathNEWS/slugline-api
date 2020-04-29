@@ -16,7 +16,6 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-
     title = serializers.CharField(required=False, default="")
     sub_title = serializers.CharField(required=False, default="")
     article_type = serializers.CharField(required=False, default=Article.Type.SLATE)
@@ -50,7 +49,6 @@ class ArticleContentSerializer(serializers.ModelSerializer):
 
 
 class ArticleHTMLSerializer(serializers.ModelSerializer):
-
     html = serializers.CharField(source="render_to_html", read_only=True)
 
     class Meta:
