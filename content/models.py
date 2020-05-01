@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib import admin
 
 from django.utils.html import strip_tags
+from django.utils.text import slugify
 
 from user.models import SluglineUser
 
@@ -42,15 +43,21 @@ class Article(models.Model):
     """A generic article class, designed to handle articles from multiple sources.
     """
 
+    class Type(models.TextChoices):
+        WORDPRESS = "wordpress"
+        SLATE = "slate"
+
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     """A secondary title that is usually typeset in smaller font below the title."""
     sub_title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
 
-    content_html = models.TextField()
+    content_raw = models.TextField(default="", blank=True)
 
-    is_wordpress = models.BooleanField(default=False)
+    article_type = models.CharField(
+        max_length=16, choices=Type.choices, default=Type.SLATE
+    )
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
@@ -61,7 +68,12 @@ class Article(models.Model):
     user = models.ForeignKey(SluglineUser, on_delete=models.SET_NULL, null=True)
 
     def render_to_html(self):
-        return self.content_html
+        if self.article_type == Article.Type.WORDPRESS:
+            return self.content_raw
+        elif self.article_type == Article.Type.SLATE:
+            raise NotImplementedError(
+                "render_to_html not implemented for Slate articles"
+            )
 
     def render_to_xml(self):
         """Returns this article converted to InDesign-compatible XML
@@ -71,6 +83,10 @@ class Article(models.Model):
 
     def __str__(self):
         return f"{self.title} by {self.author}"
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
 
 admin.site.register(Issue)

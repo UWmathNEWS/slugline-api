@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.text import slugify
 
+from user.models import SluglineUser
+
 import re
 import copy
 import xml.etree.ElementTree as ETree
@@ -109,7 +111,7 @@ class Command(BaseCommand):
         author_tag = new_soup.contents[-1].extract()
         return new_soup.prettify(), author_tag.text
 
-    def article_from_tag(self, article_tag):
+    def article_from_tag(self, article_tag, user):
         title = article_tag.find("title").text or ""
         content = article_tag.find("content:encoded", XML_NS).text
         post_tags = article_tag.findall(r'.//category[@domain="post_tag"]')
@@ -135,22 +137,28 @@ class Command(BaseCommand):
             title=title,
             slug=slugify(title),
             author=author,
-            content_html=content_html,
+            article_type=Article.Type.WORDPRESS,
+            content_raw=content_html,
             issue=issue,
-            is_wordpress=True,
-            user=None,
+            user=user,
         )
 
     def handle(self, *args, **options):
         self.stdout.write("WARNING: This will delete all existing Wordpress articles!")
         self.stdout.write("Backup the database before continuing.")
         input("Press ENTER to continue...")
+        # Check if an admin user exists
+        try:
+            user = SluglineUser.objects.get(username="admin", is_superuser=True)
+        except SluglineUser.DoesNotExist:
+            self.stdout.write("No admin superuser found. Create one first.")
+            return
         # Delete existing Wordpress articles
-        Article.objects.filter(is_wordpress=True).delete()
+        Article.objects.filter(article_type=Article.Type.WORDPRESS).delete()
         file_name = options["dump_file"]
         tree = ETree.parse(file_name)
         article_tags = tree.findall(".//item")
         articles = filter(
-            None, map(lambda tag: self.article_from_tag(tag), article_tags)
+            None, map(lambda tag: self.article_from_tag(tag, user), article_tags)
         )
         Article.objects.bulk_create(articles)
