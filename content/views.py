@@ -15,13 +15,14 @@ from content.serializers import (
     ArticleContentSerializer,
     ArticleHTMLSerializer,
 )
-from content.permissions import IsArticleOwnerOrReadOnly
+from content.permissions import IsArticleOwnerOrReadOnly, IsEditorOrReadOnly
 
 
 class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
 
+    permission_classes = [IsEditorOrReadOnly]
     @action(detail=False, methods=["GET"])
     def latest(self, request):
         latest = Issue.objects.latest_issue()
