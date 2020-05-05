@@ -13,6 +13,7 @@ class IssueSerializer(serializers.ModelSerializer):
             "issue_num",
             "pdf",
         )
+        read_only_fields = ("publish_date", "pdf")
 
 
 class ArticleSerializer(serializers.ModelSerializer):
