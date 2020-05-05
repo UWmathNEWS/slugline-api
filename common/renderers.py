@@ -8,15 +8,15 @@ class SluglineRenderer(JSONRenderer):
             # convert singular detail arguments into arrays
             if "detail" in data and isinstance(data["detail"], str):
                 data["detail"] = [data["detail"]]
+            # add a status code to the error object
+            data["status_code"] = response.status_code
             rendered_json = {
                 "success": False,
-                "status_code": response.status_code,
                 "error": data,
             }
         else:
             rendered_json = {
                 "success": True,
-                "status_code": response.status_code,
                 "data": data,
             }
         return super().render(
