@@ -35,7 +35,7 @@ class Issue(models.Model):
         return self.short_name()
 
     class Meta:
-
+        unique_together = ("volume_num", "issue_num")
         ordering = ["-volume_num", "-issue_num"]
 
 
