@@ -21,22 +21,22 @@ class Issue(models.Model):
     publish_date = models.DateField(null=True)
 
     volume_num = models.IntegerField()
-    issue_num = models.IntegerField()
+    issue_code = models.CharField(max_length=1)
 
     pdf = models.FileField(upload_to="issue_pdfs/", null=True)
 
     def short_name(self):
-        return f"v{self.volume_num}i{self.issue_num}"
+        return f"v{self.volume_num}i{self.issue_code}"
 
     def long_name(self):
-        return f"Volume {self.volume_num} Issue {self.issue_num} "
+        return f"Volume {self.volume_num} Issue {self.issue_code} "
 
     def __str__(self):
         return self.short_name()
 
     class Meta:
-
-        ordering = ["-volume_num", "-issue_num"]
+        unique_together = ("volume_num", "issue_code")
+        ordering = ["-volume_num", "-issue_code"]
 
 
 class Article(models.Model):

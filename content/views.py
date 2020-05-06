@@ -8,6 +8,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
+from common.pagination import SluglinePagination
+
 from content.models import Issue, Article
 from content.serializers import (
     IssueSerializer,
@@ -15,12 +17,14 @@ from content.serializers import (
     ArticleContentSerializer,
     ArticleHTMLSerializer,
 )
-from content.permissions import IsArticleOwnerOrReadOnly
+from content.permissions import IsArticleOwnerOrReadOnly, IsEditorOrReadOnly
 
 
 class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+
+    permission_classes = [IsEditorOrReadOnly]
 
     @action(detail=False, methods=["GET"])
     def latest(self, request):
@@ -30,7 +34,10 @@ class IssueViewSet(ModelViewSet):
     @action(detail=True, methods=["GET"])
     def articles(self, request, pk=None):
         issue_articles = Article.objects.filter(issue__pk=pk)
-        return Response(ArticleSerializer(issue_articles, many=True).data)
+        paginator = SluglinePagination()
+        page = paginator.paginate_queryset(issue_articles, request)
+        serialized = ArticleSerializer(page, many=True).data
+        return paginator.get_paginated_response(serialized)
 
 
 class ArticleViewSet(ModelViewSet):
