@@ -13,6 +13,7 @@ libsass = "*"
 django-compressor = "*"
 django-sass-processor = "*"
 djangorestframework = "*"
+pyparsing = "*"
 
 [requires]
 python_version = "3.7"

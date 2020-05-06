@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from common.mixins import SearchableFilterBackend
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
@@ -80,6 +81,8 @@ class UserViewSet(ModelViewSet):
     queryset = SluglineUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsEditor]
+    filter_backends = [SearchableFilterBackend]
+    search_fields = ["username", "email"]
     lookup_field = "username"
 
     def create(self, request, *args, **kwargs):
