@@ -55,11 +55,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("dump_file")
 
-    def get_issue_numbers(self, issue_code):
-        regex = r"v([0-9]+)i([0-9]+)"
-        match = re.match(regex, issue_code)
+    def get_issue_nums(self, issue_name):
+        regex = r"v([0-9]+)i([0-9A-Z]+)"
+        match = re.match(regex, issue_name)
         if match:
-            return int(match.group(1)), int(match.group(2))
+            return int(match.group(1)), match.group(2)
         else:
             return None
 
@@ -117,18 +117,18 @@ class Command(BaseCommand):
         post_tags = article_tag.findall(r'.//category[@domain="post_tag"]')
         # Loop through all the tags until we find one that matches a version number
         volume_num = None
-        issue_num = None
+        issue_code = None
         for tag in post_tags:
-            issue_code = tag.text
-            result = self.get_issue_numbers(issue_code)
+            issue_name = tag.text
+            result = self.get_issue_nums(issue_name)
             if result != None:
-                volume_num, issue_num = result
+                volume_num, issue_code = result
                 break
-        if issue_num == None or volume_num == None:
+        if issue_code == None or volume_num == None:
             # this doesn't have a valid issue tag, forget about it
             return None
         issue, _ = Issue.objects.get_or_create(
-            issue_num=issue_num, volume_num=volume_num
+            issue_code=issue_code, volume_num=volume_num
         )
         # get rid of the mysterious &nbsp's Wordpress insists on putting everywhere
         content = content.replace("&nbsp;", " ").strip()
