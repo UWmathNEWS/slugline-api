@@ -1,26 +1,22 @@
 name: Python application
 
-on:
-  push:
-    branches: [ master ]
-    pull_request:
-      branches: [ master ]
+on: [push]
 
-      jobs:
-        build:
-          runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-          steps:
-            - uses: actions/checkout@v2
-            - name: Set up Python 3.7
-              uses: actions/setup-python@v1
-              with:
-                python-version: 3.7
-            - name: Install pipenv
-              uses: dschep/install-pipenv-action@v1
-            - name: Install dependencies
-              run: |
-                pipenv install --dev
-            - name: Test with pytest
-              run: |
-                pipenv run pytest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install pipenv
+        uses: dschep/install-pipenv-action@v1
+      - name: Install dependencies
+        run: |
+          pipenv install --dev
+      - name: Test with pytest
+        run: |
+          pipenv run pytest
