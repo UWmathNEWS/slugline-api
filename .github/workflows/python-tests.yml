@@ -11,6 +11,7 @@ on:
 
       jobs:
         build:
+          name: Test
 
           runs-on: ubuntu-latest
 
@@ -28,4 +29,3 @@ on:
             - name: Test with pytest
               run: |
                 pipenv run pytest
-
