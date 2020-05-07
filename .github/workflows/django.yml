@@ -26,9 +26,7 @@ jobs:
         pip install --upgrade pip
         pip install pipenv
         pipenv install
-        pipenv shell
-        ./manage.py createsuperuser
-        ./manage.py runserver
     - name: Run Tests
       run: |
+        pipenv shell
         python manage.py test
