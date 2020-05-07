@@ -57,6 +57,16 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
                     field = field + "__icontains"
                 elif query[0] == "=":
                     field = field + "__iexact"
+                else:
+                    # Date range
+                    since, until = query
+                    if since == ",":
+                        search_builder.append(Q(**{field + "__date__lte": until}))
+                    elif until == ",":
+                        search_builder.append(Q(**{field + "__date__gte": since}))
+                    else:
+                        search_builder.append(Q(**{field + "__date__range": query}))
+                    continue
                 search_builder.append(Q(**{field: query[1]}))
 
             if len(search_builder):

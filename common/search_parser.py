@@ -3,14 +3,22 @@ import pyparsing as pp
 
 class SearchParser:
     def __init__(self):
-        COLON, EQUAL = map(pp.Literal, ":=")
+        COLON, EQUAL, COMMA = map(pp.Literal, ":=,")
+        SCOLON, SEQUAL, SCOMMA = map(pp.Suppress, ":=,")
+        LPAREN, RPAREN = map(pp.Suppress, "()")
         word_strict = pp.Regex(r"[^\s'\":=]+")
-        sglQuotedString = pp.QuotedString("'", escChar="\\")
-        dblQuotedString = pp.QuotedString('"', escChar="\\")
-        word = sglQuotedString | dblQuotedString | word_strict
+        sgl_quoted_string = pp.QuotedString("'", escChar="\\")
+        dbl_quoted_string = pp.QuotedString('"', escChar="\\")
+        word = sgl_quoted_string | dbl_quoted_string | word_strict
 
-        filtr_name = word_strict + COLON | word_strict + EQUAL
-        filtr = pp.Group(filtr_name + word)
+        date = pp.pyparsing_common.iso8601_date.copy()
+        date.setParseAction(pp.pyparsing_common.convertToDate())
+        date_expr = date + SCOMMA + date | COMMA + date | date + COMMA
+        date_range = LPAREN + date_expr + RPAREN
+
+        filtr_delim = COLON | EQUAL
+        filtr_delim_suppress = SCOLON | SEQUAL
+        filtr = pp.Group(word_strict + filtr_delim_suppress + date_range) | pp.Group(word_strict + filtr_delim + word)
         query_patt = pp.Dict(filtr) | word
 
         self.__expr = query_patt() * (1,)
@@ -36,6 +44,10 @@ me:""
 shiver "me:" timbers
     \U0001F603
 ""
+query (2020-01-01,2020-06-01)
+date:(2020-01-01,2020-06-01)
+date:(,2020-06-01)
+date:(2020-01-01,)
 """
     parser = SearchParser()
 

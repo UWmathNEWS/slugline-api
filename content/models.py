@@ -47,6 +47,13 @@ class Article(models.Model):
         WORDPRESS = "wordpress"
         SLATE = "slate"
 
+    class Status(models.TextChoices):
+        DRAFT = "draft"
+        PENDING = "pending review"
+        IN_PROGRESS = "in progress"
+        OKAYED = "okayed"
+        REJECTED = "rejected"
+
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     """A secondary title that is usually typeset in smaller font below the title."""
@@ -58,6 +65,9 @@ class Article(models.Model):
     article_type = models.CharField(
         max_length=16, choices=Type.choices, default=Type.SLATE
     )
+    status = models.CharField(
+        max_length=16, choices=Status.choices, default=Status.DRAFT
+    )
 
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
 
@@ -66,6 +76,9 @@ class Article(models.Model):
     is_promo = models.BooleanField(default=False)
 
     user = models.ForeignKey(SluglineUser, on_delete=models.SET_NULL, null=True)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     def render_to_html(self):
         if self.article_type == Article.Type.WORDPRESS:
