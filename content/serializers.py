@@ -10,9 +10,18 @@ class IssueSerializer(serializers.ModelSerializer):
             "id",
             "publish_date",
             "volume_num",
-            "issue_num",
+            "issue_code",
             "pdf",
         )
+        read_only_fields = ("publish_date", "pdf")
+        # override the default unique_together message
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Issue.objects.all(),
+                fields=("volume_num", "issue_code"),
+                message="ISSUE.ALREADY_EXISTS",
+            )
+        ]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
