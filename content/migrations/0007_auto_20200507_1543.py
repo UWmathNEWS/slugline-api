@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='status',
-            field=models.CharField(choices=[('draft', 'Draft'), ('pending review', 'Pending'), ('in progress', 'In Progress'), ('okayed', 'Okayed'), ('rejected', 'Rejected')], default='draft', max_length=16),
+            field=models.CharField(choices=[('draft', 'Draft'), ('pending', 'Pending'), ('in-progress', 'In Progress'), ('okayed', 'Okayed'), ('rejected', 'Rejected')], default='draft', max_length=16),
         ),
     ]

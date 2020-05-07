@@ -49,8 +49,8 @@ class Article(models.Model):
 
     class Status(models.TextChoices):
         DRAFT = "draft"
-        PENDING = "pending review"
-        IN_PROGRESS = "in progress"
+        PENDING = "pending"
+        IN_PROGRESS = "in-progress"
         OKAYED = "okayed"
         REJECTED = "rejected"
 
