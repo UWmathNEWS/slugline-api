@@ -65,6 +65,9 @@ class ArticleViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsArticleOwnerOrReadOnly]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
+    search_transformers = {
+        "is": "status"
+    }
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, author=self.request.user.writer_name)
@@ -75,6 +78,9 @@ class UserArticleViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
+    search_transformers = {
+        "is": "status"
+    }
 
     def get_queryset(self):
         return Article.objects.filter(user=self.request.user)

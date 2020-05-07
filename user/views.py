@@ -2,7 +2,7 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.db.models import Q
 from django.http.response import Http404
 
-from rest_framework import status, exceptions
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
@@ -106,7 +106,8 @@ class UserViewSet(ModelViewSet):
     search_fields = ["username", "first_name", "last_name", "writer_name"]
     search_transformers = {
         "name": transform_name,
-        "role": transform_role
+        "role": transform_role,
+        "is": transform_role
     }
     lookup_field = "username"
 

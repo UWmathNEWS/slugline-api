@@ -1,6 +1,6 @@
 from django.core.exceptions import FieldError
 from django.db.models import Q
-from rest_framework import filters, settings
+from rest_framework import filters
 from common.search_parser import SearchParser
 
 from functools import reduce
@@ -51,8 +51,11 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
             # Filter results
             for field, query in parsed_filters.items():
                 if field in search_transformers:
-                    search_builder.append(search_transformers[field](query[1]))
-                    continue
+                    if isinstance(search_transformers[field], str):
+                        field = search_transformers[field]
+                    else:
+                        search_builder.append(search_transformers[field](query[1]))
+                        continue
                 if query[0] == ":":
                     field = field + "__icontains"
                 elif query[0] == "=":
