@@ -2,21 +2,22 @@ import pyparsing as pp
 
 
 class SearchParser:
-    __COLON, __EQUAL = map(pp.Literal, ":=")
-    __word_strict = pp.Regex(r"[^\s'\":=]+")
-    __sglQuotedString = pp.QuotedString("'", escChar="\\")
-    __dblQuotedString = pp.QuotedString('"', escChar="\\")
-    __word = __sglQuotedString | __dblQuotedString | __word_strict
+    def __init__(self):
+        COLON, EQUAL = map(pp.Literal, ":=")
+        word_strict = pp.Regex(r"[^\s'\":=]+")
+        sglQuotedString = pp.QuotedString("'", escChar="\\")
+        dblQuotedString = pp.QuotedString('"', escChar="\\")
+        word = sglQuotedString | dblQuotedString | word_strict
 
-    __filtr_name = __word_strict + __COLON | __word_strict + __EQUAL
-    __filtr = pp.Group(__filtr_name + __word)
-    __query_patt = pp.Dict(__filtr) | __word
+        filtr_name = word_strict + COLON | word_strict + EQUAL
+        filtr = pp.Group(filtr_name + word)
+        query_patt = pp.Dict(filtr) | word
 
-    __expr = __query_patt() * (1,)
+        self.__expr = query_patt() * (1,)
 
     def parse_query(self, query: str):
-        parsed_query = self.__query_patt.parseString(query)
-        terms = filter(lambda t: isinstance(t, str), parsed_query.asList())
+        parsed_query = self.__expr.parseString(query)
+        terms = list(filter(lambda t: isinstance(t, str), parsed_query.asList()))
         filters = parsed_query.asDict()
 
         return terms, filters
@@ -28,7 +29,7 @@ hello world
 "hello world"
 hello world is:me
 hello role:Editor world
-hello title:"Malice in the Palice" world
+hello title_strict:"Malice in the Palice" world
 hello title:"Malice\\" in the \U0001F600Palice" world is:false
 is:true
 me:""
