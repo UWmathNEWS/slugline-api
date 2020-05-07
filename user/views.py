@@ -103,7 +103,7 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsEditor]
     filter_backends = [SearchableFilterBackend]
-    search_fields = ["username", "first_name", "last_name", "writer_name", "email"]
+    search_fields = ["username", "first_name", "last_name", "writer_name"]
     search_transformers = {
         "name": transform_name,
         "role": transform_role

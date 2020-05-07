@@ -27,6 +27,9 @@ class SluglineUser(AbstractUser):
     def is_editor(self, value):
         pass
 
+    class Meta:
+        ordering = ["date_joined"]
+
 
 class UserSerializer(serializers.ModelSerializer):
     is_editor = serializers.BooleanField(default=False)
