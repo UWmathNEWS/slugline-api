@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "sass_processor",
     "rest_framework",
     "rest_framework.authtoken",
     "common",
@@ -136,7 +135,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "sass_processor.finders.CssFinder",
 ]
 
 # Media, uploaded article images, issue PDFs, etc.
