@@ -29,29 +29,3 @@ class SearchParser:
         filters = parsed_query.asDict()
 
         return terms, filters
-
-
-if __name__ == "__main__":
-    tests = u"""\
-hello world
-"hello world"
-hello world is:me
-hello role:Editor world
-hello title_strict:"Malice in the Palice" world
-hello title:"Malice\\" in the \U0001F600Palice" world is:false
-is:true
-me:""
-shiver "me:" timbers
-    \U0001F603
-""
-query (2020-01-01,2020-06-01)
-date:(2020-01-01,2020-06-01)
-date:(,2020-06-01)
-date:(2020-01-01,)
-"""
-    parser = SearchParser()
-
-    for test in tests.splitlines():
-        print(test)
-        print(parser.parse_query(test))
-        print()
