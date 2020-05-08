@@ -43,11 +43,7 @@ class IssueViewSet(ModelViewSet):
         "__term": transform_issue_name
     }
 
-    class __PseudoArticleViewSet:
-        search_fields = ["title", "content_raw"]
-
-    __articles_filter = SearchableFilterBackend()
-    __articles_viewset = __PseudoArticleViewSet()
+    __articles_filter = SearchableFilterBackend(["title", "content_raw"])
 
     permission_classes = [IsEditorOrReadOnly]
 
@@ -59,7 +55,7 @@ class IssueViewSet(ModelViewSet):
     @action(detail=True, methods=["GET"])
     def articles(self, request, pk=None):
         issue_articles = Article.objects.filter(issue__pk=pk)
-        issue_articles = self.__articles_filter.filter_queryset(request, issue_articles, self.__articles_viewset)
+        issue_articles = self.__articles_filter.filter_queryset(request, issue_articles, None)
         paginator = SluglinePagination()
         page = paginator.paginate_queryset(issue_articles, request)
         serialized = ArticleSerializer(page, many=True).data

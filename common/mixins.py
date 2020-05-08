@@ -24,24 +24,33 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
 
     __parser = SearchParser()
     __search_fields = None
+    __search_transformers = None
+
+    def __init__(self, search_fields=None, search_transformers=None):
+        """This constructor is for if we have to initialize the filter manually"""
+        if search_fields is not None:
+            self.__search_fields = map(lambda f: f + "__icontains", search_fields)
+        if search_transformers is not None:
+            self.__search_transformers = search_transformers
 
     def filter_queryset(self, request, queryset, view):
         sort = request.query_params.get('sort', None)
         search = request.query_params.get('search', None)
-        search_transformers = view.search_transformers if hasattr(view, "search_transformers") else {}
 
-        # Cache fields so we don't have to recompute the map every time
+        # Cache fields and transformers so we don't have to recompute the map every time
         if self.__search_fields is None:
             self.__search_fields = map(lambda f: f + "__icontains", view.search_fields)
+        if self.__search_transformers is None:
+            self.__search_transformers = view.search_transformers if hasattr(view, "search_transformers") else {}
 
         if search is not None:
             parsed_terms, parsed_filters = self.__parser.parse_query(search)
             search_builder = []
 
-            if "__term" in search_transformers:
+            if "__term" in self.__search_transformers:
                 # Ignore default search fields if we have a transformer for search terms
                 for term in parsed_terms:
-                    search_builder.append(search_transformers["__term"](term))
+                    search_builder.append(self.__search_transformers["__term"](term))
             else:
                 # Search each term in each field
                 for field in self.__search_fields:
@@ -50,11 +59,11 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
 
             # Filter results
             for field, query in parsed_filters.items():
-                if field in search_transformers:
-                    if isinstance(search_transformers[field], str):
-                        field = search_transformers[field]
+                if field in self.__search_transformers:
+                    if isinstance(self.__search_transformers[field], str):
+                        field = self.__search_transformers[field]
                     else:
-                        search_builder.append(search_transformers[field](query[1]))
+                        search_builder.append(self.__search_transformers[field](query[1]))
                         continue
                 if query[0] == ":":
                     field = field + "__icontains"
