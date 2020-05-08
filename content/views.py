@@ -7,7 +7,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-from common.mixins import SearchableFilterBackend
+from common.filters import SearchableFilterBackend
 from common.pagination import SluglinePagination
 
 from content.models import Issue, Article

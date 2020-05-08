@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from common.mixins import SearchableFilterBackend
+from common.filters import SearchableFilterBackend
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
