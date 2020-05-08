@@ -1,13 +1,15 @@
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.db.models import Q
 from django.http.response import Http404
 
-from rest_framework import status, exceptions
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from common.filters import SearchableFilterBackend
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
@@ -76,10 +78,37 @@ def current_user_view(request):
         return Response(None)
 
 
+def transform_name(query):
+    *first, last = query.rsplit(" ", 1)
+    if len(first):
+        return Q(first_name__icontains=first[0]) & Q(last_name__icontains=last)
+    else:
+        return Q(first_name__icontains=last) | Q(last_name__icontains=last)
+
+
+def transform_role(query):
+    query = query.lower()
+    if query == "staff":
+        return Q(is_staff=True)
+    elif query == "editor":
+        return Q(is_staff=False) & Q(groups__name__in=["Editor"])
+    elif query == "contributor":
+        return Q(is_staff=False) & ~Q(groups__name__in=["Editor"]) & Q(groups__name__in=["Contributor"])
+    else:
+        return Q(pk__in=[])
+
+
 class UserViewSet(ModelViewSet):
     queryset = SluglineUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsEditor]
+    filter_backends = [SearchableFilterBackend]
+    search_fields = ["username", "first_name", "last_name", "writer_name"]
+    search_transformers = {
+        "name": transform_name,
+        "role": transform_role,
+        "is": transform_role
+    }
     lookup_field = "username"
 
     def create(self, request, *args, **kwargs):
