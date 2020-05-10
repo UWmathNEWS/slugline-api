@@ -43,7 +43,9 @@ def update_user(user, request):
         else:
             password = data.get("cur_password", "")
             if not user.check_password(password):
-                raise APIException({"user": ["USER.PASSWORD.CURRENT_INCORRECT"]})
+                raise APIException(
+                    {"cur_password": ["USER.PASSWORD.CURRENT_INCORRECT"]}
+                )
             del data["cur_password"]
 
     # We set the partial flag as the front-end may not choose to update all fields at once
@@ -93,7 +95,11 @@ def transform_role(query):
     elif query == "editor":
         return Q(is_staff=False) & Q(groups__name__in=["Editor"])
     elif query == "contributor":
-        return Q(is_staff=False) & ~Q(groups__name__in=["Editor"]) & Q(groups__name__in=["Contributor"])
+        return (
+            Q(is_staff=False)
+            & ~Q(groups__name__in=["Editor"])
+            & Q(groups__name__in=["Contributor"])
+        )
     else:
         return Q(pk__in=[])
 
@@ -107,7 +113,7 @@ class UserViewSet(ModelViewSet):
     search_transformers = {
         "name": transform_name,
         "role": transform_role,
-        "is": transform_role
+        "is": transform_role,
     }
     lookup_field = "username"
 
