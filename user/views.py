@@ -34,21 +34,23 @@ def logout_view(request):
     return Response()
 
 
+def confirm_password(request):
+    if "cur_password" in request.data:
+        if not request.user.check_password(request.data["cur_password"]):
+            raise APIException({"cur_password": ["USER.PASSWORD.CURRENT_INCORRECT"]})
+        del request.data["cur_password"]
+    else:
+        raise APIException("USER.PASSWORD.CURRENT_REQUIRED")
+
+
 def update_user(user, request):
     data = request.data
-    if "password" in data:
-        # We skip password checking ONLY on a password reset, i.e. an editor is updating an arbitrary user's password
-        if user is not request.user and request.user.is_editor:
-            pass
-        else:
-            password = data.get("cur_password", "")
-            if not user.check_password(password):
-                raise APIException({"user": ["USER.PASSWORD.CURRENT_INCORRECT"]})
-            del data["cur_password"]
-
     # We set the partial flag as the front-end may not choose to update all fields at once
     serializer = UserSerializer(data=data, instance=user, partial=True)
     serializer.is_valid()
+    # if we're changing roles, or password, confirm password
+    if data.get("is_editor") != user.is_editor or "password" in data:
+        confirm_password(request)
     if len(serializer.errors):
         raise APIException(serializer.errors)
     else:
@@ -93,7 +95,11 @@ def transform_role(query):
     elif query == "editor":
         return Q(is_staff=False) & Q(groups__name__in=["Editor"])
     elif query == "contributor":
-        return Q(is_staff=False) & ~Q(groups__name__in=["Editor"]) & Q(groups__name__in=["Contributor"])
+        return (
+            Q(is_staff=False)
+            & ~Q(groups__name__in=["Editor"])
+            & Q(groups__name__in=["Contributor"])
+        )
     else:
         return Q(pk__in=[])
 
@@ -107,7 +113,7 @@ class UserViewSet(ModelViewSet):
     search_transformers = {
         "name": transform_name,
         "role": transform_role,
-        "is": transform_role
+        "is": transform_role,
     }
     lookup_field = "username"
 
@@ -117,7 +123,8 @@ class UserViewSet(ModelViewSet):
         # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
         if len(request.data["username"]) > 150:
             raise APIException({"username": ["USER.USERNAME.TOO_LONG"]})
-
+        if request.data["is_editor"]:
+            confirm_password(request)
         serializer = UserSerializer(data=request.data)
         serializer.is_valid()
         if len(serializer.errors):
