@@ -2,7 +2,9 @@
 The backend portion of `slugline`, math**NEWS**'s best and only Django/React based publishing website.
 
 ## Running
-- Create a `virtualenv` by running `virtualenv <environment location>` and run `<environment location>/scripts/activate` to activate it. Python 3.7+ is recommmended.
+- Create a `virtualenv` by running `virtualenv <environment location>`. Python 3.7+ is recommmended. Depending on your OS run the following to activate the virtualenv:
+	- Windows: `<environment location>/scripts/activate`
+	- Linux: `source <environment location>/bin/activate`
 - Run `pip install -r requirements.txt` to download depdendencies.
 - Create a superuser with `./manage.py createsuperuser`. Then run `./manage.py runserver` to start the backend. 
 If you want to fiddle with the data, go to `localhost:8000/admin` and login with your superuser credentials.
