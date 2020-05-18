@@ -1,2 +1,2 @@
 [tool.black]
-exclude = '(\d|\w)*/migrations/(\d|\w)*.py'
+force-exclude = '/migrations/'
