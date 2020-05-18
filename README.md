@@ -1,4 +1,4 @@
-![Django CI](https://github.com/UWmathNEWS/slugline-api/workflows/Django%20CI/badge.svg)
+![Tests](https://github.com/UWmathNEWS/slugline-api/workflows/Django%20CI/badge.svg)
 
 ## slugline-api
 The backend portion of `slugline`, math**NEWS**'s best and only Django/React based publishing website.
