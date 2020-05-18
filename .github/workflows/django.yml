@@ -29,6 +29,10 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
+    - name: Display Python version
+      run: python -c "import platform; print(platform.python_version(), platform.platform())"
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip

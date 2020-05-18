@@ -33,7 +33,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
+      run: python -c "import platform; print(platform.python_version(), platform.platform())"
 
     - name: Install dependencies
       run: |
