@@ -1,2 +1,2 @@
 [tool.black]
-exclude = '*/migrations/*.py'
+exclude = '*/migrations/'
