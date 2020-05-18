@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies and lint.
+# This workflow will install Python dependencies and run linting.
 
 name: Python code style
 
@@ -23,9 +23,9 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-python${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-python${{ matrix.python-version }}-pip-
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
