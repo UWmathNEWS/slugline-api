@@ -18,7 +18,9 @@ class SearchParser:
 
         filtr_delim = COLON | EQUAL
         filtr_delim_suppress = SCOLON | SEQUAL
-        filtr = pp.Group(word_strict + filtr_delim_suppress + date_range) | pp.Group(word_strict + filtr_delim + word)
+        filtr = pp.Group(word_strict + filtr_delim_suppress + date_range) | pp.Group(
+            word_strict + filtr_delim + word
+        )
         query_patt = pp.Dict(filtr) | word
 
         self.__expr = query_patt() * (1,)

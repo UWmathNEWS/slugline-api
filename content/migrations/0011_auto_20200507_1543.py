@@ -7,24 +7,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0010_auto_20200506_1516'),
+        ("content", "0010_auto_20200506_1516"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='article',
-            name='date_created',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(1970, 1, 1, 0, 0)),
+            model_name="article",
+            name="date_created",
+            field=models.DateTimeField(
+                auto_now_add=True, default=datetime.datetime(1970, 1, 1, 0, 0)
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='article',
-            name='date_modified',
+            model_name="article",
+            name="date_modified",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='article',
-            name='status',
-            field=models.CharField(choices=[('draft', 'Draft'), ('pending', 'Pending'), ('in-progress', 'In Progress'), ('okayed', 'Okayed'), ('rejected', 'Rejected')], default='draft', max_length=16),
+            model_name="article",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("draft", "Draft"),
+                    ("pending", "Pending"),
+                    ("in-progress", "In Progress"),
+                    ("okayed", "Okayed"),
+                    ("rejected", "Rejected"),
+                ],
+                default="draft",
+                max_length=16,
+            ),
         ),
     ]
