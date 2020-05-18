@@ -1,2 +1,2 @@
 [tool.black]
-force-exclude = '/migrations/'
+force-exclude = "/migrations/"
