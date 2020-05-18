@@ -5,7 +5,9 @@ name: Python black checks
 on:
   push:
     branches: [ master ]
-  pull_request
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
   build:
