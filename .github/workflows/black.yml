@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies and run flake8.
 
-name: Python flake8 checks
+name: Python black checks
 
 on:
   push:
