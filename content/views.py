@@ -39,9 +39,7 @@ class IssueViewSet(ModelViewSet):
     serializer_class = IssueSerializer
     filter_backends = [SearchableFilterBackend]
     search_fields = []
-    search_transformers = {
-        "__term": transform_issue_name
-    }
+    search_transformers = {"__term": transform_issue_name}
 
     __articles_filter = SearchableFilterBackend(["title", "content_raw"])
 
@@ -55,7 +53,9 @@ class IssueViewSet(ModelViewSet):
     @action(detail=True, methods=["GET"])
     def articles(self, request, pk=None):
         issue_articles = Article.objects.filter(issue__pk=pk)
-        issue_articles = self.__articles_filter.filter_queryset(request, issue_articles, None)
+        issue_articles = self.__articles_filter.filter_queryset(
+            request, issue_articles, None
+        )
         paginator = SluglinePagination()
         page = paginator.paginate_queryset(issue_articles, request)
         serialized = ArticleSerializer(page, many=True).data
@@ -68,9 +68,7 @@ class ArticleViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsArticleOwnerOrReadOnly]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
-    search_transformers = {
-        "is": "status"
-    }
+    search_transformers = {"is": "status"}
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, author=self.request.user.writer_name)
@@ -81,9 +79,7 @@ class UserArticleViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
-    search_transformers = {
-        "is": "status"
-    }
+    search_transformers = {"is": "status"}
 
     def get_queryset(self):
         return Article.objects.filter(user=self.request.user)

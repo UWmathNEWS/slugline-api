@@ -6,26 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0005_article_user'),
+        ("content", "0005_article_user"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='article',
-            name='content_html',
-        ),
-        migrations.RemoveField(
-            model_name='article',
-            name='is_wordpress',
+        migrations.RemoveField(model_name="article", name="content_html",),
+        migrations.RemoveField(model_name="article", name="is_wordpress",),
+        migrations.AddField(
+            model_name="article",
+            name="article_type",
+            field=models.CharField(
+                choices=[("wordpress", "Wordpress"), ("slate", "Slate")],
+                default="slate",
+                max_length=16,
+            ),
         ),
         migrations.AddField(
-            model_name='article',
-            name='article_type',
-            field=models.CharField(choices=[('wordpress', 'Wordpress'), ('slate', 'Slate')], default='slate', max_length=16),
-        ),
-        migrations.AddField(
-            model_name='article',
-            name='content_raw',
-            field=models.TextField(blank=True, default=''),
+            model_name="article",
+            name="content_raw",
+            field=models.TextField(blank=True, default=""),
         ),
     ]

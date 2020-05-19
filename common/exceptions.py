@@ -10,4 +10,3 @@ class APIException(_APIException):
             )
         else:
             super().__init__(detail=detail, **kwargs)
-

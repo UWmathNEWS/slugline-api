@@ -34,14 +34,16 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
             self.__search_transformers = search_transformers
 
     def filter_queryset(self, request, queryset, view):
-        sort = request.query_params.get('sort', None)
-        search = request.query_params.get('search', None)
+        sort = request.query_params.get("sort", None)
+        search = request.query_params.get("search", None)
 
         # Cache fields and transformers so we don't have to recompute the map every time
         if self.__search_fields is None:
             self.__search_fields = map(lambda f: f + "__icontains", view.search_fields)
         if self.__search_transformers is None:
-            self.__search_transformers = view.search_transformers if hasattr(view, "search_transformers") else {}
+            self.__search_transformers = (
+                view.search_transformers if hasattr(view, "search_transformers") else {}
+            )
 
         if search is not None:
             parsed_terms, parsed_filters = self.__parser.parse_query(search)
@@ -63,7 +65,9 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
                     if isinstance(self.__search_transformers[field], str):
                         field = self.__search_transformers[field]
                     else:
-                        search_builder.append(self.__search_transformers[field](query[1]))
+                        search_builder.append(
+                            self.__search_transformers[field](query[1])
+                        )
                         continue
                 if query[0] == ":":
                     field = field + "__icontains"
@@ -83,7 +87,9 @@ class SearchableFilterBackend(filters.BaseFilterBackend):
 
             if len(search_builder):
                 try:
-                    queryset = queryset.filter(reduce(lambda acc, f: acc | f, search_builder))
+                    queryset = queryset.filter(
+                        reduce(lambda acc, f: acc | f, search_builder)
+                    )
                 except FieldError:
                     queryset = queryset.none()
 
