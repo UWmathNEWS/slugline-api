@@ -1,4 +1,6 @@
 ![Tests](https://github.com/UWmathNEWS/slugline-api/workflows/Tests/badge.svg)
+![Python flake8 checks](https://github.com/UWmathNEWS/slugline-api/workflows/Python%20flake8%20checks/badge.svg)
+![Python black checks](https://github.com/UWmathNEWS/slugline-api/workflows/Python%20black%20checks/badge.svg)
 
 ## slugline-api
 The backend portion of `slugline`, math**NEWS**'s best and only Django/React based publishing website.
