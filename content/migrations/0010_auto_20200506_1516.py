@@ -6,20 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0009_auto_20200506_1508'),
+        ("content", "0009_auto_20200506_1508"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='issue',
-            options={'ordering': ['-volume_num', '-issue_code']},
+            name="issue", options={"ordering": ["-volume_num", "-issue_code"]},
         ),
         migrations.AlterUniqueTogether(
-            name='issue',
-            unique_together={('volume_num', 'issue_code')},
+            name="issue", unique_together={("volume_num", "issue_code")},
         ),
-        migrations.RemoveField(
-            model_name='issue',
-            name='issue_num',
-        ),
+        migrations.RemoveField(model_name="issue", name="issue_num",),
     ]
