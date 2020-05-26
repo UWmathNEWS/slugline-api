@@ -10,6 +10,7 @@ The backend portion of `slugline`, math**NEWS**'s best and only Django/React bas
 	- Windows: `<environment location>/scripts/activate`
 	- Linux: `source <environment location>/bin/activate`
 - Run `pip install -r requirements.txt` to download dependencies.
+- Create the database with `./manage.py migrate`.
 - Create a superuser with `./manage.py createsuperuser`. Then run `./manage.py runserver` to start the backend. 
 If you want to fiddle with the data, go to `localhost:8000/admin` and login with your superuser credentials.
 - By default, this runs on port 8000. If you change this, be sure to go over to the [front-end](http://www.github.com/UWmathNEWS/slugline-web) and change the port setting there.
