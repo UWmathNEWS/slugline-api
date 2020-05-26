@@ -75,7 +75,7 @@ def current_user_view(request):
                 and any(["is_editor" in request.data])
             ):
                 raise APIException("USER.INSUFFICIENT_PRIVILEGES")
-            return update_user(user=request.user, request=request)
+            return update_user(request.user, request)
     else:
         return Response(None)
 
@@ -94,13 +94,21 @@ def transform_role(query):
         return Q(is_staff=True)
     elif query == "editor":
         return Q(is_staff=False) & Q(groups__name__in=["Editor"])
+    elif query == "copyeditor":
+        return (
+            Q(is_staff=False)
+            & ~Q(groups__name__in=["Editor"])
+            & Q(groups__name__in=["Copyeditor"])
+        )
     elif query == "contributor":
         return (
             Q(is_staff=False)
             & ~Q(groups__name__in=["Editor"])
+            & ~Q(groups__name__in=["Copyeditor"])
             & Q(groups__name__in=["Contributor"])
         )
     else:
+        # return an empty queryset
         return Q(pk__in=[])
 
 

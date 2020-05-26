@@ -8,6 +8,11 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 
+GROUPS = {
+    "Contributor": [],
+    "Copyeditor": ["Contributor"],
+    "Editor": ["Copyeditor", "Contributor"],
+}
 FORBIDDEN_USERNAMES = {"admin", "administrator", "root", "toor", "sudo", "sudoers"}
 
 
@@ -15,6 +20,8 @@ class SluglineUser(AbstractUser):
     email = models.EmailField(blank=False)
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
+
+    __roles_cache = None
 
     @property
     def is_editor(self):
@@ -26,6 +33,27 @@ class SluglineUser(AbstractUser):
     @is_editor.setter
     def is_editor(self, value):
         pass
+
+    @property
+    def role(self):
+        """Returns the highest role that a user has."""
+        if self.is_staff:
+            return "Staff"
+        elif self.groups.filter(name="Editor").exists():
+            return "Editor"
+        elif self.groups.filter(name="Copyeditor").exists():
+            return "Copyeditor"
+        else:
+            return "Contributor"
+
+    @role.setter
+    def role(self, value):
+        self.__roles_cache = set(value or self.groups.values_list("name", flat=True))
+
+    def get_all_roles(self):
+        if self.__roles_cache is None:
+            self.role = None  # force cache to update
+        return self.__roles_cache
 
     class Meta:
         ordering = ["date_joined"]
@@ -51,6 +79,11 @@ class UserSerializer(serializers.ModelSerializer):
         if validated_data["is_editor"]:
             user.groups.add(Group.objects.get(name="Editor"))
 
+        if validated_data["role"] in GROUPS:
+            for base_role in GROUPS[validated_data["role"]]:
+                user.groups.add(Group.objects.get(name=base_role))
+            user.groups.add(Group.objects.get(name=validated_data["role"]))
+
         return user
 
     def update(self, instance, validated_data):
@@ -68,6 +101,18 @@ class UserSerializer(serializers.ModelSerializer):
             instance.groups.add(Group.objects.get(name="Editor"))
         elif not validated_data.get("is_editor", True):
             instance.groups.remove(Group.objects.get(name="Editor"))
+
+        if validated_data.get("role") in GROUPS:
+            new_roles = {validated_data["role"], *GROUPS[validated_data["role"]]}
+            current_roles = set(instance.groups.values_list("name", flat=True))
+
+            for obsolete_role in current_roles - new_roles:
+                instance.groups.remove(Group.objects.get(name=obsolete_role))
+
+            for new_role in new_roles - current_roles:
+                instance.groups.add(Group.objects.get(name=new_role))
+
+            instance.role = new_roles
 
         return instance
 
@@ -115,6 +160,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "is_staff",
             "is_editor",
+            "role",
             "writer_name",
         )
         read_only_fields = ("is_staff",)
