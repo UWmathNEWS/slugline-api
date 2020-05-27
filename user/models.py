@@ -20,8 +20,8 @@ class SluglineUser(AbstractUser):
     email = models.EmailField(blank=False)
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
-    """Uniquely generated key to reset password"""
-    recovery_key = models.CharField(max_length=128, default="")
+    """Uniquely generated token to reset password"""
+    password_reset_token = models.CharField(max_length=128, default="")
 
     __roles_cache = None
 
