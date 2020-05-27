@@ -129,6 +129,7 @@ def reset_password_view(request, key=""):
         if len(serializer.errors):
             raise APIException(serializer.errors)
         else:
+            user.recovery_key = ""
             serializer.save()
             return Response(None)
 
