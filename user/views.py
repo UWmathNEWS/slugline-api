@@ -4,7 +4,7 @@ from django.http.response import Http404
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.exceptions import APIException, ValidationError
+from rest_framework.exceptions import APIException, AuthenticationFailed, Throttled, ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
@@ -13,17 +13,39 @@ from common.filters import SearchableFilterBackend
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
+from math import ceil
+import time
+
 
 @api_view(["POST"])
 def login_view(request):
+    if "timeout" in request.session:
+        wait = ceil(request.session["timeout"] - time.time())
+        if wait > 0:
+            raise Throttled(detail=f"AUTH.THROTTLED.{wait}")
+
     username = request.data.get("username", None)
     password = request.data.get("password", None)
+
     if username is None or password is None:
-        raise APIException("AUTH.CREDENTIALS_NONEXISTENT")
+        raise AuthenticationFailed("AUTH.CREDENTIALS_NONEXISTENT")
+
     user = authenticate(username=username, password=password)
+
     if user is None:
-        raise APIException("AUTH.CREDENTIALS_INVALID")
+        request.session["attempts"] = request.session.get("attempts", 0) + 1
+        if request.session["attempts"] >= 10:
+            # exponential timeout for each failed login attempt past the 10th
+            timeout = (1 << (request.session["attempts"] - 10)) * 60
+            request.session["timeout"] = time.time() + timeout
+            raise Throttled(detail=f"AUTH.THROTTLED.{timeout}")
+        raise AuthenticationFailed("AUTH.CREDENTIALS_INVALID")
+
     login(request, user)
+    if "attempts" in request.session:
+        del request.session["attempts"]
+    if "timeout" in request.session:
+        del request.session["timeout"]
     return Response(UserSerializer(user).data)
 
 
