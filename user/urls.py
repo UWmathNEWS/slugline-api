@@ -10,5 +10,6 @@ urlpatterns = [
     path("login/", login_view),
     path("logout/", logout_view),
     path("me/", current_user_view),
+    path("reset/<key>/", reset_password_view),
     *router.urls,
 ]

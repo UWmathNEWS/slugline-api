@@ -4,7 +4,12 @@ from django.http.response import Http404
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.exceptions import APIException, AuthenticationFailed, Throttled, ValidationError
+from rest_framework.exceptions import (
+    APIException,
+    AuthenticationFailed,
+    Throttled,
+    ValidationError,
+)
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
@@ -14,6 +19,7 @@ from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
 
 from math import ceil
+from secrets import token_hex
 import time
 
 
@@ -100,6 +106,31 @@ def current_user_view(request):
             return update_user(request.user, request)
     else:
         return Response(None)
+
+
+@api_view(["GET", "POST"])
+def reset_password_view(request, key=""):
+    timeout = int(key[64:], 16)  # keys are 64-character random bytes + hex-encoded time
+    if int(timeout) - time.time() < 0:
+        raise APIException("RESET.TIMED_OUT")
+    if request.method == "GET":
+        try:
+            user = SluglineUser.objects.get(recovery_key=key)
+            return Response(UserSerializer(user).data)
+        except SluglineUser.DoesNotExist:
+            raise APIException("USER.DOES_NOT_EXIST")
+    else:
+        user = SluglineUser.objects.get(recovery_key=key)
+        serializer = UserSerializer(
+            data={"password": request.data["password"]}, instance=user, partial=True
+        )
+        serializer.is_valid()
+
+        if len(serializer.errors):
+            raise APIException(serializer.errors)
+        else:
+            serializer.save()
+            return Response(None)
 
 
 def transform_name(query):
@@ -206,3 +237,15 @@ class UserViewSet(ModelViewSet):
         if len(username) > 150:
             raise ValidationError({"username": ["USER.USERNAME.TOO_LONG"]})
         return Response(None)
+
+    @action(detail=True, methods=["POST"])
+    def reset_password(self, request, username=None):
+        try:
+            user = SluglineUser.objects.get(username=username)
+            timeout = hex(ceil(time.time() + 21600))[2:]  # Set key to expire after 6 hours
+            recovery_key = token_hex(32) + timeout  # Make base key 64 characters in length
+            user.recovery_key = recovery_key
+            user.save()
+            return Response(recovery_key)
+        except SluglineUser.DoesNotExist:
+            raise APIException("USER.DOES_NOT_EXIST")
