@@ -5,10 +5,7 @@ from user.models import SluglineUser
 
 class IsContributorOrAbove(BasePermission):
     def has_permission(self, request, view):
-        return bool(
-            isinstance(request.user, SluglineUser)
-            or request.user.is_staff
-        )
+        return bool(isinstance(request.user, SluglineUser) or request.user.is_staff)
 
 
 class IsCopyeditorOrAbove(IsContributorOrAbove):

@@ -110,7 +110,9 @@ def current_user_view(request):
 
 @api_view(["GET", "POST"])
 def reset_password_view(request, token=""):
-    timeout = int(token[64:], 16)  # tokens are 64-character random bytes + hex-encoded time
+    timeout = int(
+        token[64:], 16
+    )  # tokens are 64-character random bytes + hex-encoded time
     if int(timeout) - time.time() < 0:
         raise APIException("RESET.TIMED_OUT")
     if request.method == "GET":
@@ -243,8 +245,12 @@ class UserViewSet(ModelViewSet):
     def reset_password(self, request, username=None):
         try:
             user = SluglineUser.objects.get(username=username)
-            timeout = hex(ceil(time.time() + 21600))[2:]  # Set token to expire after 6 hours
-            reset_token = token_hex(32) + timeout  # Make base token 64 characters in length
+            timeout = hex(ceil(time.time() + 21600))[
+                2:
+            ]  # Set token to expire after 6 hours
+            reset_token = (
+                token_hex(32) + timeout
+            )  # Make base token 64 characters in length
             user.password_reset_token = reset_token
             user.save()
             return Response(reset_token)
