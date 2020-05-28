@@ -79,6 +79,8 @@ class UserSerializer(serializers.ModelSerializer):
             )
         user = SluglineUser.objects.create(**validated_data)
         user.set_password(validated_data["password"])
+        user.save()
+
         user.groups.add(Group.objects.get(name="Contributor"))
 
         if validated_data["is_editor"]:
