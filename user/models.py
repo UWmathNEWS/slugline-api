@@ -57,6 +57,9 @@ class SluglineUser(AbstractUser):
             self.role = None  # force cache to update
         return self.__roles_cache
 
+    def at_least(self, role):
+        return role in self.get_all_roles()
+
     class Meta:
         ordering = ["date_joined"]
 

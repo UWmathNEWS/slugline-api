@@ -15,8 +15,8 @@ from content.serializers import (
     IssueSerializer,
     ArticleSerializer,
     ArticleContentSerializer,
-    ArticleHTMLSerializer,
 )
+from common.permissions import IsCopyeditorOrAbove
 from content.permissions import IsArticleOwnerOrReadOnly, IsEditorOrReadOnly
 
 
@@ -65,7 +65,7 @@ class IssueViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsArticleOwnerOrReadOnly]
+    permission_classes = [IsCopyeditorOrAbove | IsArticleOwnerOrReadOnly]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
     search_transformers = {"is": "status"}
