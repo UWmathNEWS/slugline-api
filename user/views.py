@@ -77,7 +77,7 @@ def update_user(user, request):
     serializer = UserSerializer(data=data, instance=user, partial=True)
     serializer.is_valid()
     # if we're changing roles, or password, confirm password
-    if data.get("is_editor") != user.is_editor or "password" in data:
+    if data.get("role") != user.role or "password" in data:
         confirm_password(request)
     if len(serializer.errors):
         raise APIException(serializer.errors)
@@ -99,8 +99,8 @@ def current_user_view(request):
         else:
             if (
                 not request.user.is_staff
-                and not request.user.is_editor
-                and any(["is_editor" in request.data])
+                and not request.user.at_least("Editor")
+                and any(["role" in request.data])
             ):
                 raise APIException("USER.INSUFFICIENT_PRIVILEGES")
             return update_user(request.user, request)
@@ -187,7 +187,7 @@ class UserViewSet(ModelViewSet):
         # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
         if len(request.data["username"]) > 150:
             raise APIException({"username": ["USER.USERNAME.TOO_LONG"]})
-        if request.data["is_editor"]:
+        if request.data["role"] != "Contributor":
             confirm_password(request)
         serializer = UserSerializer(data=request.data)
         serializer.is_valid()
@@ -221,7 +221,7 @@ class UserViewSet(ModelViewSet):
                 request.user.username == kwargs.get("username", "")
                 or SluglineUser.objects.get(
                     username=kwargs.get("username", "")
-                ).is_editor
+                ).at_least("Editor")
             ):
                 raise Exception
             return Response(super().destroy(request, *args, **kwargs).data)

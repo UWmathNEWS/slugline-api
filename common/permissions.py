@@ -8,18 +8,18 @@ class IsContributorOrAbove(BasePermission):
         return bool(isinstance(request.user, SluglineUser) or request.user.is_staff)
 
 
-class IsCopyeditorOrAbove(IsContributorOrAbove):
+class IsCopyeditorOrAbove(BasePermission):
     def has_permission(self, request, view):
         return bool(
-            super().has_permission(request, view)
+            isinstance(request.user, SluglineUser)
             and (request.user.at_least("Copyeditor") or request.user.is_staff)
         )
 
 
-class IsEditorOrAbove(IsCopyeditorOrAbove):
+class IsEditorOrAbove(BasePermission):
     def has_permission(self, request, view):
         return bool(
-            super().has_permission(request, view)
+            isinstance(request.user, SluglineUser)
             and (request.user.at_least("Editor") or request.user.is_staff)
         )
 

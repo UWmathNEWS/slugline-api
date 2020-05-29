@@ -7,6 +7,8 @@ from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
 
+import warnings
+
 
 GROUPS = {
     "Contributor": [],
@@ -23,19 +25,6 @@ class SluglineUser(AbstractUser):
     """Uniquely generated token to reset password"""
     password_reset_token = models.CharField(max_length=128, default="")
 
-    __roles_cache = None
-
-    @property
-    def is_editor(self):
-        """Is this user an editor?"""
-        return self.groups.filter(name="Editor").exists()
-
-    # We write a setter as we construct temporary users when doing password validation, and sometimes editor information
-    # is part of the data.
-    @is_editor.setter
-    def is_editor(self, value):
-        pass
-
     @property
     def role(self):
         """Returns the highest role that a user has."""
@@ -48,24 +37,35 @@ class SluglineUser(AbstractUser):
         else:
             return "Contributor"
 
+    # We write a setter as we construct temporary users when doing password validation, and sometimes role information
+    # is part of the data.
     @role.setter
     def role(self, value):
-        self.__roles_cache = set(value or self.groups.values_list("name", flat=True))
-
-    def get_all_roles(self):
-        if self.__roles_cache is None:
-            self.role = None  # force cache to update
-        return self.__roles_cache
+        pass
 
     def at_least(self, role):
-        return role in self.get_all_roles()
+        """Returns if a user has at least a given role's privileges"""
+        return self.is_staff or role == self.role or role in GROUPS.get(self.role, [])
+
+    @property
+    def is_editor(self):
+        """Is this user an editor?"""
+        warnings.simplefilter("always", DeprecationWarning)
+        warnings.warn(
+            "Deprecated usage of SluglineUser::is_editor --- use SluglineUser::role instead",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        warnings.simplefilter("default", DeprecationWarning)
+        return self.at_least("Editor")
 
     class Meta:
         ordering = ["date_joined"]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_editor = serializers.BooleanField(default=False)
+    is_editor = serializers.ReadOnlyField(default=False)
+    role = serializers.CharField(default="Contributor")
 
     def create(self, validated_data):
         if (
@@ -83,11 +83,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         user.groups.add(Group.objects.get(name="Contributor"))
 
-        if validated_data["is_editor"]:
-            user.groups.add(Group.objects.get(name="Editor"))
-
         if validated_data["role"] in GROUPS:
             for base_role in GROUPS[validated_data["role"]]:
+                print(base_role)
                 user.groups.add(Group.objects.get(name=base_role))
             user.groups.add(Group.objects.get(name=validated_data["role"]))
 
@@ -104,11 +102,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        if validated_data.get("is_editor", False):
-            instance.groups.add(Group.objects.get(name="Editor"))
-        elif not validated_data.get("is_editor", True):
-            instance.groups.remove(Group.objects.get(name="Editor"))
-
         if validated_data.get("role") in GROUPS:
             new_roles = {validated_data["role"], *GROUPS[validated_data["role"]]}
             current_roles = set(instance.groups.values_list("name", flat=True))
@@ -118,8 +111,6 @@ class UserSerializer(serializers.ModelSerializer):
 
             for new_role in new_roles - current_roles:
                 instance.groups.add(Group.objects.get(name=new_role))
-
-            instance.role = new_roles
 
         return instance
 
