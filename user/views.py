@@ -217,11 +217,10 @@ class UserViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            if (
-                request.user.username == kwargs.get("username", "")
-                or SluglineUser.objects.get(
-                    username=kwargs.get("username", "")
-                ).at_least("Editor")
+            if request.user.username == kwargs.get(
+                "username", ""
+            ) or SluglineUser.objects.get(username=kwargs.get("username", "")).at_least(
+                "Editor"
             ):
                 raise Exception
             return Response(super().destroy(request, *args, **kwargs).data)

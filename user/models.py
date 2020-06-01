@@ -85,7 +85,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         if validated_data["role"] in GROUPS:
             for base_role in GROUPS[validated_data["role"]]:
-                print(base_role)
                 user.groups.add(Group.objects.get(name=base_role))
             user.groups.add(Group.objects.get(name=validated_data["role"]))
 
