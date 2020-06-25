@@ -28,9 +28,7 @@ class SluglineUser(AbstractUser):
     @property
     def role(self):
         """Returns the highest role that a user has."""
-        if self.is_staff:
-            return "Staff"
-        elif self.groups.filter(name="Editor").exists():
+        if self.groups.filter(name="Editor").exists():
             return "Editor"
         elif self.groups.filter(name="Copyeditor").exists():
             return "Copyeditor"
