@@ -7,8 +7,6 @@ from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
 
-import warnings
-
 
 GROUPS = {
     "Contributor": [],
@@ -45,24 +43,11 @@ class SluglineUser(AbstractUser):
         """Returns if a user has at least a given role's privileges"""
         return self.is_staff or role == self.role or role in GROUPS.get(self.role, [])
 
-    @property
-    def is_editor(self):
-        """Is this user an editor?"""
-        warnings.simplefilter("always", DeprecationWarning)
-        warnings.warn(
-            "Deprecated usage of SluglineUser::is_editor --- use SluglineUser::role instead",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        warnings.simplefilter("default", DeprecationWarning)
-        return self.at_least("Editor")
-
     class Meta:
         ordering = ["date_joined"]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_editor = serializers.ReadOnlyField(default=False)
     role = serializers.CharField(default="Contributor")
 
     def create(self, validated_data):
@@ -154,7 +139,6 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "is_staff",
-            "is_editor",
             "role",
             "writer_name",
         )
