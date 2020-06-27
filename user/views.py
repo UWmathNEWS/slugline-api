@@ -109,18 +109,28 @@ def current_user_view(request):
 
 
 @api_view(["GET", "POST"])
-def reset_password_view(request, token=""):
-    timeout = int(
-        token[64:], 16
-    )  # tokens are 64-character random bytes + hex-encoded time
-    if int(timeout) - time.time() < 0:
-        raise APIException("RESET.TIMED_OUT")
+def reset_password_view(request):
+    token = None
+    if request.method == "GET":
+        token = request.GET.get("token")
+    elif request.method == "POST":
+        token = request.data.get("token")
+    if token is None:
+        raise APIException("RESET.INVALID_TOKEN")
+    try:
+        timeout = int(
+            token[64:], 16
+        )  # tokens are 64-character random bytes + hex-encoded time
+        if int(timeout) - time.time() < 0:
+            raise APIException("RESET.INVALID_TOKEN")
+    except ValueError:
+        raise APIException("RESET.INVALID_TOKEN")
     if request.method == "GET":
         try:
             user = SluglineUser.objects.get(password_reset_token=token)
             return Response(UserSerializer(user).data)
         except SluglineUser.DoesNotExist:
-            raise APIException("USER.DOES_NOT_EXIST")
+            raise APIException("RESET.INVALID_TOKEN")
     else:
         user = SluglineUser.objects.get(password_reset_token=token)
         serializer = UserSerializer(
