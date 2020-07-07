@@ -17,3 +17,4 @@ typed-ast~=1.4.1
 # These packages are just for development, and are not needed in production.
 pre-commit
 black
+drf-yasg
