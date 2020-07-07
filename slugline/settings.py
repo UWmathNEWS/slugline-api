@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "common",
     "content",
     "user",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -151,4 +152,8 @@ REST_FRAMEWORK = {
         "common.renderers.SluglineRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+}
+
+SWAGGER_SETTINGS = {
+    "DEFAULT_INFO": "slugline.urls.swagger_info",
 }
