@@ -34,6 +34,7 @@ jobs:
         mkdir public
         npx redoc-cli bundle schema.yml
         mv redoc-static.html public/index.html
+        touch public/.nojekyll
 
     - name: Deploy to GitHub Pages
       if: success()
