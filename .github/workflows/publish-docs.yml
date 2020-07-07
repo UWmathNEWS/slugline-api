@@ -1,4 +1,4 @@
-name: website
+name: Documentation
 
 on:
   push:
