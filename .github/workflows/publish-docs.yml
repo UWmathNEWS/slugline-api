@@ -32,7 +32,7 @@ jobs:
     - name: Create webpage
       run: |
         mkdir public
-        npx redoc-cli bundle swagger.yml
+        npx redoc-cli bundle schema.yml
         mv redoc-static.html public/index.html
 
     - name: Deploy to GitHub Pages
