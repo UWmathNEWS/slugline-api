@@ -8,6 +8,11 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 
+GROUPS = {
+    "Contributor": [],
+    "Copyeditor": ["Contributor"],
+    "Editor": ["Copyeditor", "Contributor"],
+}
 FORBIDDEN_USERNAMES = {"admin", "administrator", "root", "toor", "sudo", "sudoers"}
 
 
@@ -15,24 +20,35 @@ class SluglineUser(AbstractUser):
     email = models.EmailField(blank=False)
     """Articles written by this user will use this name by default."""
     writer_name = models.CharField(max_length=255)
+    """Uniquely generated token to reset password"""
+    password_reset_token = models.CharField(max_length=128, default="")
 
     @property
-    def is_editor(self):
-        """Is this user an editor?"""
-        return self.groups.filter(name="Editor").exists()
+    def role(self):
+        """Returns the highest role that a user has."""
+        if self.groups.filter(name="Editor").exists():
+            return "Editor"
+        elif self.groups.filter(name="Copyeditor").exists():
+            return "Copyeditor"
+        else:
+            return "Contributor"
 
-    # We write a setter as we construct temporary users when doing password validation, and sometimes editor information
+    # We write a setter as we construct temporary users when doing password validation, and sometimes role information
     # is part of the data.
-    @is_editor.setter
-    def is_editor(self, value):
+    @role.setter
+    def role(self, value):
         pass
+
+    def at_least(self, role):
+        """Returns if a user has at least a given role's privileges"""
+        return self.is_staff or role == self.role or role in GROUPS.get(self.role, [])
 
     class Meta:
         ordering = ["date_joined"]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_editor = serializers.BooleanField(default=False)
+    role = serializers.CharField(default="Contributor")
 
     def create(self, validated_data):
         if (
@@ -46,10 +62,14 @@ class UserSerializer(serializers.ModelSerializer):
             )
         user = SluglineUser.objects.create(**validated_data)
         user.set_password(validated_data["password"])
+        user.save()
+
         user.groups.add(Group.objects.get(name="Contributor"))
 
-        if validated_data["is_editor"]:
-            user.groups.add(Group.objects.get(name="Editor"))
+        if validated_data["role"] in GROUPS:
+            for base_role in GROUPS[validated_data["role"]]:
+                user.groups.add(Group.objects.get(name=base_role))
+            user.groups.add(Group.objects.get(name=validated_data["role"]))
 
         return user
 
@@ -64,10 +84,15 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        if validated_data.get("is_editor", False):
-            instance.groups.add(Group.objects.get(name="Editor"))
-        elif not validated_data.get("is_editor", True):
-            instance.groups.remove(Group.objects.get(name="Editor"))
+        if validated_data.get("role") in GROUPS:
+            new_roles = {validated_data["role"], *GROUPS[validated_data["role"]]}
+            current_roles = set(instance.groups.values_list("name", flat=True))
+
+            for obsolete_role in current_roles - new_roles:
+                instance.groups.remove(Group.objects.get(name=obsolete_role))
+
+            for new_role in new_roles - current_roles:
+                instance.groups.add(Group.objects.get(name=new_role))
 
         return instance
 
@@ -114,7 +139,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "is_staff",
-            "is_editor",
+            "role",
             "writer_name",
         )
         read_only_fields = ("is_staff",)

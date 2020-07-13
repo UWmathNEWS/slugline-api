@@ -1,9 +1,26 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
 
-from content.models import Article, Issue
-from user.models import SluglineUser
+
+BASE_PERMS = [
+    "Can add article",
+    "Can change article",
+    "Can delete article",
+    "Can view article",
+    "Can view issue",
+]
+
+COPYEDITOR_PERMS = []
+
+EDITOR_PERMS = [
+    "Can add user",
+    "Can change user",
+    "Can delete user",
+    "Can view user",
+    "Can add issue",
+    "Can change issue",
+    "Can delete issue",
+]
 
 
 class Command(BaseCommand):
@@ -11,23 +28,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         editor, _ = Group.objects.get_or_create(name="Editor")
+        copyeditor, _ = Group.objects.get_or_create(name="Copyeditor")
         contrib, _ = Group.objects.get_or_create(name="Contributor")
 
-        editor.permissions.add(Permission.objects.get(name="Can add user"))
-        editor.permissions.add(Permission.objects.get(name="Can change user"))
-        editor.permissions.add(Permission.objects.get(name="Can delete user"))
-        editor.permissions.add(Permission.objects.get(name="Can view user"))
-        editor.permissions.add(Permission.objects.get(name="Can add article"))
-        editor.permissions.add(Permission.objects.get(name="Can change article"))
-        editor.permissions.add(Permission.objects.get(name="Can delete article"))
-        editor.permissions.add(Permission.objects.get(name="Can view article"))
-        editor.permissions.add(Permission.objects.get(name="Can add issue"))
-        editor.permissions.add(Permission.objects.get(name="Can change issue"))
-        editor.permissions.add(Permission.objects.get(name="Can delete issue"))
-        editor.permissions.add(Permission.objects.get(name="Can view issue"))
+        contrib.permissions.clear()
+        copyeditor.permissions.clear()
+        editor.permissions.clear()
 
-        contrib.permissions.add(Permission.objects.get(name="Can add article"))
-        contrib.permissions.add(Permission.objects.get(name="Can change article"))
-        contrib.permissions.add(Permission.objects.get(name="Can delete article"))
-        contrib.permissions.add(Permission.objects.get(name="Can view article"))
-        contrib.permissions.add(Permission.objects.get(name="Can view issue"))
+        for perm in BASE_PERMS:
+            contrib.permissions.add(Permission.objects.get(name=perm))
+
+        for perm in COPYEDITOR_PERMS:
+            copyeditor.permissions.add(Permission.objects.get(name=perm))
+
+        for perm in EDITOR_PERMS:
+            editor.permissions.add(Permission.objects.get(name=perm))
