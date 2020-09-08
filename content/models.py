@@ -25,6 +25,10 @@ class Issue(models.Model):
 
     pdf = models.FileField(upload_to="issue_pdfs/", null=True)
 
+    @property
+    def published(self):
+        return self.publish_date is not None
+
     def short_name(self):
         return f"v{self.volume_num}i{self.issue_code}"
 
@@ -79,6 +83,10 @@ class Article(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+
+    @property
+    def published(self):
+        return self.issue.publish_date is not None
 
     def render_to_html(self):
         if self.article_type == Article.Type.WORDPRESS:

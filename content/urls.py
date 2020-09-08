@@ -4,6 +4,7 @@ from content.views import (
     ArticleViewSet,
     UserArticleViewSet,
     IssueViewSet,
+    PublishedIssueViewSet,
     ArticleContentViewSet,
     ArticleHTMLViewSet,
 )
@@ -11,6 +12,7 @@ from content.views import (
 router = SimpleRouter()
 
 router.register("issues", IssueViewSet)
+router.register("published_issues", PublishedIssueViewSet)
 router.register("articles", ArticleViewSet)
 router.register("user_articles", UserArticleViewSet, basename="user-articles")
 router.register("article_content", ArticleContentViewSet)
