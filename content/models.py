@@ -128,7 +128,7 @@ class Issue(models.Model):
                 pixdata_la = cover_la_img.load()
 
                 width, height = cover_la_img.size
-                # Registration black is close to RGB(30, 30, 30). Ideally, we
+                # Registration black is close to Gray(30). Ideally, we
                 # want the alpha channel to be
                 #
                 #   - 255 (fully opaque) when L <= 30
@@ -137,22 +137,23 @@ class Issue(models.Model):
                 # We thus apply the linear transformation
                 #
                 #   L_n = L
-                #   A_n = (255 / (255 - 30)) * (255 - L)
+                #   A_n = (255 / (255 - 30) * (855 + 30)) * (255 - L) * (855 + L)
                 #
-                # and then clamp A_n so that it falls in [0, 255].
+                # and then clamp A_n so that it falls in [0, 255]. We choose a
+                # quadratic function as it gives slightly better midtones than
+                # a strictly linear function.
                 for y in range(height):
                     for x in range(width):
                         l, a = pixdata_la[x, y]
                         l_n = l
-                        a_n = min(round(255 / 225 * (255 - l)), 255)
+                        a_n = min(round(255 / 199125 * (255 - l) * (855 + l)), 255)
                         pixdata_la[x, y] = (l_n, a_n)
 
-                cover_pix.writePNG(
-                    get_issue_cover_paths(instance.pdf.path, sizes=[size])[0]
+                path_rgb, path_la = get_issue_cover_paths(
+                    instance.pdf.path, sizes=[size]
                 )
-                cover_la_img.save(
-                    get_issue_cover_paths(instance.pdf.path, sizes=[size])[1], "PNG"
-                )
+                cover_pix.writePNG(path_rgb)
+                cover_la_img.save(path_la, "PNG")
 
     class Meta:
         unique_together = ("volume_num", "issue_code")
