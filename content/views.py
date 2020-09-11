@@ -85,7 +85,7 @@ class PublishedIssueViewSet(ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["GET"])
     def latest(self, request):
-        latest = Issue.objects.latest_issue()
+        latest = self.get_queryset().first()
         return Response(IssueSerializer(latest).data)
 
 

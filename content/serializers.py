@@ -12,6 +12,9 @@ class IssueSerializer(serializers.ModelSerializer):
             "volume_num",
             "issue_code",
             "pdf",
+            "title",
+            "description",
+            "colour",
         )
         read_only_fields = ("publish_date", "pdf")
         # override the default unique_together message
@@ -26,7 +29,7 @@ class IssueSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False, default="")
-    sub_title = serializers.CharField(required=False, default="")
+    sub_title = serializers.CharField(required=False, default="", allow_blank=True)
     article_type = serializers.CharField(required=False, default=Article.Type.SLATE)
     issue = serializers.PrimaryKeyRelatedField(
         required=False,

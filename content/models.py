@@ -1,10 +1,29 @@
 from django.db import models
+from django.db.models import signals
 from django.contrib import admin
+
+from django.core.files import storage
 
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 from user.models import SluglineUser
+
+import io
+import fitz
+from PIL import Image
+
+
+ISSUE_UPLOAD_DIR = "issue_pdfs"
+SIZES = [1, 2]
+
+
+class OverwriteStorage(storage.FileSystemStorage):
+    """https://djangosnippets.org/snippets/976/"""
+
+    def get_available_name(self, name, max_length=None):
+        self.delete(name)
+        return name
 
 
 class IssueManager(models.Manager):
@@ -12,9 +31,54 @@ class IssueManager(models.Manager):
         return self.all().first()
 
 
+def get_issue_cover_paths(issue_path, sizes=None):
+    if sizes is None:
+        sizes = SIZES
+    return [
+        path
+        for size in sizes
+        for path in (
+            issue_path + ".COVER-RGB-{}x.png".format(size),
+            issue_path + ".COVER-LA-{}x.png".format(size),
+        )
+    ]
+
+
 class Issue(models.Model):
     """An issue of the publication.
     """
+
+    class Colour(models.TextChoices):
+        BLASTOFF_BLUE = "blastoff-blue"
+        CELESTIAL_BLUE = "celestial-blue"
+        COSMIC_ORANGE = "cosmic-orange"
+        FIREBALL_FUCHSIA = "fireball-fuchsia"
+        GALAXY_GOLD = "galaxy-gold"
+        GAMMA_GREEN = "gamma-green"
+        GRAVITY_GRAPE = "gravity-grape"
+        LIFTOFF_LEMON = "liftoff-lemon"
+        LUNAR_BLUE = "lunar-blue"
+        MARTIAN_GREEN = "martian-green"
+        ORBIT_ORANGE = "orbit-orange"
+        OUTRAGEOUS_ORCHID = "outrageous-orchid"
+        PLANETARY_PURPLE = "planetary-purple"
+        PULSAR_PINK = "pulsar-pink"
+        REENTRY_RED = "reentry-red"
+        ROCKET_RED = "rocket-red"
+        SUNBURST_YELLOW = "sunburst-yellow"
+        TERRA_GREEN = "terra-green"
+        TERRESTIAL_TEAL = "terrestrial-teal"
+        VENUS_VIOLET = "venus-violet"
+        PASTEL_BLUE = "pastel-blue"
+        PASTEL_BUFF = "pastel-buff"
+        PASTEL_CANARY = "pastel-canary"
+        PASTEL_GOLDENROD = "pastel-goldenrod"
+        PASTEL_GREY = "pastel-grey"
+        PASTEL_GREEN = "pastel-green"
+        PASTEL_ORCHID = "pastel-orchid"
+        PASTEL_PINK = "pastel-pink"
+        PASTEL_SALMON = "pastel-salmon"
+        ACCENT = "accent"
 
     objects = IssueManager()
 
@@ -23,7 +87,15 @@ class Issue(models.Model):
     volume_num = models.IntegerField()
     issue_code = models.CharField(max_length=1)
 
-    pdf = models.FileField(upload_to="issue_pdfs/", null=True)
+    pdf = models.FileField(
+        upload_to=ISSUE_UPLOAD_DIR, null=True, blank=True, storage=OverwriteStorage()
+    )
+
+    title = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    colour = models.CharField(
+        max_length=24, choices=Colour.choices, default=Colour.ACCENT
+    )
 
     @property
     def published(self):
@@ -38,9 +110,56 @@ class Issue(models.Model):
     def __str__(self):
         return self.short_name()
 
+    @staticmethod
+    def create_cover_image(sender, **kwargs):
+        instance = kwargs["instance"]
+
+        if instance.pdf:
+            doc = fitz.open(instance.pdf.path)
+            cover = doc[0]
+            for size in SIZES:
+                cover_pix = cover.getPixmap(matrix=fitz.Matrix(size / 2, size / 2))
+                bytes_stream = io.BytesIO(
+                    cover_pix.getImageData(output="ppm")
+                )  # We use ppm for speed
+                cover_la_img = Image.open(bytes_stream).convert(
+                    "LA"
+                )  # LA = luminosity and alpha
+                pixdata_la = cover_la_img.load()
+
+                width, height = cover_la_img.size
+                # Registration black is close to RGB(30, 30, 30). Ideally, we
+                # want the alpha channel to be
+                #
+                #   - 255 (fully opaque) when L <= 30
+                #   - 0 (fully transparent) when L == 255
+                #
+                # We thus apply the linear transformation
+                #
+                #   L_n = L
+                #   A_n = (255 / (255 - 30)) * (255 - L)
+                #
+                # and then clamp A_n so that it falls in [0, 255].
+                for y in range(height):
+                    for x in range(width):
+                        l, a = pixdata_la[x, y]
+                        l_n = l
+                        a_n = min(round(255 / 225 * (255 - l)), 255)
+                        pixdata_la[x, y] = (l_n, a_n)
+
+                cover_pix.writePNG(
+                    get_issue_cover_paths(instance.pdf.path, sizes=[size])[0]
+                )
+                cover_la_img.save(
+                    get_issue_cover_paths(instance.pdf.path, sizes=[size])[1], "PNG"
+                )
+
     class Meta:
         unique_together = ("volume_num", "issue_code")
         ordering = ["-volume_num", "-issue_code"]
+
+
+signals.post_save.connect(Issue.create_cover_image, sender=Issue)
 
 
 class Article(models.Model):
