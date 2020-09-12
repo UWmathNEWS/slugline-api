@@ -115,7 +115,7 @@ class Issue(models.Model):
         instance = kwargs["instance"]
 
         if instance.pdf:
-            doc = fitz.open(instance.pdf.path)
+            doc = fitz.Document(instance.pdf.path)
             cover = doc[0]
             for size in SIZES:
                 cover_pix = cover.getPixmap(matrix=fitz.Matrix(size / 2, size / 2))
@@ -134,19 +134,24 @@ class Issue(models.Model):
                 #   - 255 (fully opaque) when L <= 30
                 #   - 0 (fully transparent) when L == 255
                 #
-                # We thus apply the linear transformation
+                # We thus apply the transformation
                 #
                 #   L_n = L
-                #   A_n = (255 / (255 - 30) * (855 + 30)) * (255 - L) * (855 + L)
+                #   A_n = min {(255 / (256 * 256)) * (256 + 30 - L) * (256 - 30 + L), 3 * (255 - L)}
                 #
                 # and then clamp A_n so that it falls in [0, 255]. We choose a
                 # quadratic function as it gives slightly better midtones than
-                # a strictly linear function.
+                # a strictly linear function, and choose a steep linear
+                # function for the right tail as
                 for y in range(height):
                     for x in range(width):
                         l, a = pixdata_la[x, y]
                         l_n = l
-                        a_n = min(round(255 / 199125 * (255 - l) * (855 + l)), 255)
+                        a_n = min(
+                            round(255 / 65536 * (286 - l) * (226 + l)),
+                            round(3 * (255 - l)),
+                            255,
+                        )
                         pixdata_la[x, y] = (l_n, a_n)
 
                 path_rgb, path_la = get_issue_cover_paths(
