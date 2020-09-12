@@ -32,6 +32,11 @@ class IssueManager(models.Manager):
 
 
 def get_issue_cover_paths(issue_path, sizes=None):
+    """Given a path to an issue, returns the cover image paths. Returns RGB for full colour, and LA for grayscale.
+
+    LA stands for luminosity and alpha; we do not produce an alpha channel, however, and the LA distinction is
+    strictly historical.
+    """
     if sizes is None:
         sizes = SIZES
     return [
@@ -78,7 +83,7 @@ class Issue(models.Model):
         PASTEL_ORCHID = "pastel-orchid"
         PASTEL_PINK = "pastel-pink"
         PASTEL_SALMON = "pastel-salmon"
-        ACCENT = "accent"
+        PAPER = "paper"
 
     objects = IssueManager()
 
@@ -94,7 +99,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     colour = models.CharField(
-        max_length=24, choices=Colour.choices, default=Colour.ACCENT
+        max_length=24, choices=Colour.choices, default=Colour.PAPER
     )
 
     @property
@@ -122,37 +127,7 @@ class Issue(models.Model):
                 bytes_stream = io.BytesIO(
                     cover_pix.getImageData(output="ppm")
                 )  # We use ppm for speed
-                cover_la_img = Image.open(bytes_stream).convert(
-                    "LA"
-                )  # LA = luminosity and alpha
-                pixdata_la = cover_la_img.load()
-
-                width, height = cover_la_img.size
-                # Registration black is close to Gray(30). Ideally, we
-                # want the alpha channel to be
-                #
-                #   - 255 (fully opaque) when L <= 30
-                #   - 0 (fully transparent) when L == 255
-                #
-                # We thus apply the transformation
-                #
-                #   L_n = L
-                #   A_n = min {(255 / (256 * 256)) * (256 + 30 - L) * (256 - 30 + L), 3 * (255 - L)}
-                #
-                # and then clamp A_n so that it falls in [0, 255]. We choose a
-                # quadratic function as it gives slightly better midtones than
-                # a strictly linear function, and choose a steep linear
-                # function for the right tail as
-                for y in range(height):
-                    for x in range(width):
-                        l, a = pixdata_la[x, y]
-                        l_n = l
-                        a_n = min(
-                            round(255 / 65536 * (286 - l) * (226 + l)),
-                            round(3 * (255 - l)),
-                            255,
-                        )
-                        pixdata_la[x, y] = (l_n, a_n)
+                cover_la_img = Image.open(bytes_stream).convert("L")
 
                 path_rgb, path_la = get_issue_cover_paths(
                     instance.pdf.path, sizes=[size]
