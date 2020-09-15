@@ -7,13 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0013_auto_20200908_1918'),
+        ("content", "0013_auto_20200908_1918"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='issue',
-            name='pdf',
-            field=models.FileField(blank=True, null=True, storage=content.models.OverwriteStorage(), upload_to='issue_pdfs'),
+            model_name="issue",
+            name="pdf",
+            field=models.FileField(
+                blank=True,
+                null=True,
+                storage=content.models.OverwriteStorage(),
+                upload_to="issue_pdfs",
+            ),
         ),
     ]
