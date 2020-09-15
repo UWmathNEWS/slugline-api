@@ -64,8 +64,7 @@ class Command(BaseCommand):
             return None
 
     def is_block_element(self, elem):
-        """Returns true if tag is a block-level element in HTML.
-        """
+        """Returns true if tag is a block-level element in HTML."""
         if isinstance(elem, NavigableString):
             return False
         else:
@@ -73,7 +72,7 @@ class Command(BaseCommand):
 
     def parse_wordpress_html(self, content):
         """Reads in raw HTML from a Wordpress dump and does some
-        post-processing to add paragraph breaks and attempt to 
+        post-processing to add paragraph breaks and attempt to
         extract the author name.
         """
         content_soup = BeautifulSoup(content, features="html.parser")

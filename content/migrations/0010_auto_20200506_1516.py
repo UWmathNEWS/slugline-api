@@ -11,10 +11,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="issue", options={"ordering": ["-volume_num", "-issue_code"]},
+            name="issue",
+            options={"ordering": ["-volume_num", "-issue_code"]},
         ),
         migrations.AlterUniqueTogether(
-            name="issue", unique_together={("volume_num", "issue_code")},
+            name="issue",
+            unique_together={("volume_num", "issue_code")},
         ),
-        migrations.RemoveField(model_name="issue", name="issue_num",),
+        migrations.RemoveField(
+            model_name="issue",
+            name="issue_num",
+        ),
     ]

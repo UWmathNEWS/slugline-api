@@ -51,7 +51,9 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="issue", name="description", field=models.TextField(blank=True),
+            model_name="issue",
+            name="description",
+            field=models.TextField(blank=True),
         ),
         migrations.AddField(
             model_name="issue",

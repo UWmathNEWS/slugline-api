@@ -50,8 +50,7 @@ def get_issue_cover_paths(issue_path, sizes=None):
 
 
 class Issue(models.Model):
-    """An issue of the publication.
-    """
+    """An issue of the publication."""
 
     class Colour(models.TextChoices):
         BLASTOFF_BLUE = "blastoff-blue"
@@ -144,8 +143,7 @@ signals.post_save.connect(Issue.create_cover_image, sender=Issue)
 
 
 class Article(models.Model):
-    """A generic article class, designed to handle articles from multiple sources.
-    """
+    """A generic article class, designed to handle articles from multiple sources."""
 
     class Type(models.TextChoices):
         WORDPRESS = "wordpress"
@@ -198,7 +196,7 @@ class Article(models.Model):
 
     def render_to_xml(self):
         """Returns this article converted to InDesign-compatible XML
-        for print export. 
+        for print export.
         """
         raise NotImplementedError("render_to_xml not implemented")
 

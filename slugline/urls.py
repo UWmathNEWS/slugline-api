@@ -39,7 +39,10 @@ swagger_info = openapi.Info(
     # license=openapi.License(name="AGPL v3+"),
 )
 
-schema_view = get_schema_view(public=True, permission_classes=(permissions.AllowAny,),)
+schema_view = get_schema_view(
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     url(
