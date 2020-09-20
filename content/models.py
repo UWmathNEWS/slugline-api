@@ -1,10 +1,8 @@
 from django.db import models
-from django.db.models import signals
 from django.contrib import admin
 
 from django.core.files import storage
 
-from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 from user.models import SluglineUser
@@ -114,12 +112,11 @@ class Issue(models.Model):
     def __str__(self):
         return self.short_name()
 
-    @staticmethod
-    def create_cover_image(sender, **kwargs):
-        instance = kwargs["instance"]
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
-        if instance.pdf:
-            doc = fitz.Document(instance.pdf.path)
+        if self.pdf:
+            doc = fitz.Document(self.pdf.path)
             cover = doc[0]
             for size in SIZES:
                 cover_pix = cover.getPixmap(matrix=fitz.Matrix(size / 2, size / 2))
@@ -129,7 +126,7 @@ class Issue(models.Model):
                 cover_la_img = Image.open(bytes_stream).convert("L")
 
                 path_rgb, path_la = get_issue_cover_paths(
-                    instance.pdf.path, sizes=[size]
+                    self.pdf.path, sizes=[size]
                 )
                 cover_pix.writePNG(path_rgb)
                 cover_la_img.save(path_la, "PNG")
@@ -137,9 +134,6 @@ class Issue(models.Model):
     class Meta:
         unique_together = ("volume_num", "issue_code")
         ordering = ["-volume_num", "-issue_code"]
-
-
-signals.post_save.connect(Issue.create_cover_image, sender=Issue)
 
 
 class Article(models.Model):
