@@ -17,10 +17,8 @@ from content.serializers import (
     ArticleSerializer,
     ArticleContentSerializer,
 )
-from common.permissions import IsCopyeditorOrAbove
 from content.permissions import (
     IsPublishedOrIsAuthenticated,
-    IsArticleOwnerOrReadOnly,
     IsEditorOrIsAuthenticatedReadOnly,
 )
 from user.models import SluglineUser
@@ -54,7 +52,7 @@ class IssueViewSet(ModelViewSet):
     @action(detail=False, methods=["GET"])
     def latest(self, request):
         latest = Issue.objects.latest_issue()
-        return Response(IssueSerializer(latest).data)
+        return Response(IssueSerializer(latest, context={"request": request}).data)
 
     @action(detail=True, methods=["GET"], permission_classes=[])
     def articles(self, request, pk=None):
@@ -70,7 +68,9 @@ class IssueViewSet(ModelViewSet):
         )
         paginator = SluglinePagination()
         page = paginator.paginate_queryset(issue_articles, request)
-        serialized = ArticleSerializer(page, many=True).data
+        serialized = ArticleSerializer(
+            page, many=True, context={"request": request}
+        ).data
         return paginator.get_paginated_response(serialized)
 
 
@@ -86,7 +86,7 @@ class PublishedIssueViewSet(ReadOnlyModelViewSet):
     @action(detail=False, methods=["GET"])
     def latest(self, request):
         latest = self.get_queryset().first()
-        return Response(IssueSerializer(latest).data)
+        return Response(IssueSerializer(latest, context={"request": request}).data)
 
 
 class ArticleViewSet(ModelViewSet):

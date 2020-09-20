@@ -184,7 +184,7 @@ class Article(models.Model):
 
     @property
     def published(self):
-        return self.issue.publish_date is not None
+        return self.issue.published
 
     def render_to_html(self):
         if self.article_type == Article.Type.WORDPRESS:
