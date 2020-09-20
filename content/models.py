@@ -125,9 +125,7 @@ class Issue(models.Model):
                 )  # We use ppm for speed
                 cover_la_img = Image.open(bytes_stream).convert("L")
 
-                path_rgb, path_la = get_issue_cover_paths(
-                    self.pdf.path, sizes=[size]
-                )
+                path_rgb, path_la = get_issue_cover_paths(self.pdf.path, sizes=[size])
                 cover_pix.writePNG(path_rgb)
                 cover_la_img.save(path_la, "PNG")
 
