@@ -10,8 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="article", name="content_html",),
-        migrations.RemoveField(model_name="article", name="is_wordpress",),
+        migrations.RemoveField(
+            model_name="article",
+            name="content_html",
+        ),
+        migrations.RemoveField(
+            model_name="article",
+            name="is_wordpress",
+        ),
         migrations.AddField(
             model_name="article",
             name="article_type",

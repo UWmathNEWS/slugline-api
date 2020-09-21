@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="sluglineuser", options={"ordering": ["date_joined"]},
+            name="sluglineuser",
+            options={"ordering": ["date_joined"]},
         ),
     ]

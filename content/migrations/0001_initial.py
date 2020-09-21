@@ -28,7 +28,9 @@ class Migration(migrations.Migration):
                 ("issue_num", models.IntegerField()),
                 ("pdf", models.FileField(null=True, upload_to="issue_pdfs/")),
             ],
-            options={"ordering": ["-volume_num", "-issue_num"],},
+            options={
+                "ordering": ["-volume_num", "-issue_num"],
+            },
         ),
         migrations.CreateModel(
             name="Article",
