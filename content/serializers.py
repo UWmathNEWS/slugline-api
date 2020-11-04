@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from common.serializers import ModelWithDetailSerializer
 from content.models import Article, Issue
 
 
@@ -27,7 +28,7 @@ class IssueSerializer(serializers.ModelSerializer):
         ]
 
 
-class ArticleSerializer(serializers.ModelSerializer):
+class ArticleSerializer(ModelWithDetailSerializer):
     title = serializers.CharField(required=False, default="")
     sub_title = serializers.CharField(required=False, default="", allow_blank=True)
     article_type = serializers.CharField(required=False, default=Article.Type.SLATE)
@@ -50,7 +51,9 @@ class ArticleSerializer(serializers.ModelSerializer):
             "is_promo",
             "issue",
             "user",
+            "content_raw",
         )
+        detail_fields = ("content_raw",)
         read_only_fields = ("slug", "is_article_of_issue", "is_promo", "user")
 
 

@@ -1,6 +1,8 @@
 import re
 
 from django.db.models import Q
+from django.utils.decorators import method_decorator  # for deprecation
+from drf_yasg.utils import swagger_auto_schema  # for deprecation
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
@@ -9,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 from common.filters import SearchableFilterBackend
+from common.mixins import RetrieveWithDetailModelMixin
 from common.pagination import SluglinePagination
 
 from content.models import Issue, Article
@@ -89,7 +92,7 @@ class PublishedIssueViewSet(ReadOnlyModelViewSet):
         return Response(IssueSerializer(latest, context={"request": request}).data)
 
 
-class ArticleViewSet(ModelViewSet):
+class ArticleViewSet(ModelViewSet, RetrieveWithDetailModelMixin):
     class ArticlePermissions(IsPublishedOrIsAuthenticated):
         def has_object_permission(self, request, view, article):
             if request.method in SAFE_METHODS:
@@ -127,6 +130,8 @@ class UserArticleViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         return Article.objects.filter(user=self.request.user)
 
 
+@method_decorator(name="retrieve", decorator=swagger_auto_schema(deprecated=True))
+@method_decorator(name="update", decorator=swagger_auto_schema(deprecated=True))
 class ArticleContentViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     queryset = Article.objects.all()
     serializer_class = ArticleContentSerializer
