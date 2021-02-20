@@ -50,7 +50,7 @@ class SluglineUser(AbstractUser):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(default="Contributor")
+    role = serializers.CharField(default=CONTRIBUTOR_GROUP)
 
     def create(self, validated_data):
         if (
@@ -66,7 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
 
-        user.groups.add(Group.objects.get(name="Contributor"))
+        user.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
 
         if validated_data["role"] in GROUPS:
             for base_role in GROUPS[validated_data["role"]]:
