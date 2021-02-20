@@ -1,24 +1,4 @@
-from django.contrib.auth.models import Group, Permission
-
-BASE_PERMS = [
-    "Can add article",
-    "Can change article",
-    "Can delete article",
-    "Can view article",
-    "Can view issue",
-]
-
-COPYEDITOR_PERMS = []
-
-EDITOR_PERMS = [
-    "Can add user",
-    "Can change user",
-    "Can delete user",
-    "Can view user",
-    "Can add issue",
-    "Can change issue",
-    "Can delete issue",
-]
+from django.contrib.auth.models import Group
 
 EDITOR_GROUP = "Editor"
 COPYEDITOR_GROUP = "Copyeditor"
@@ -39,15 +19,6 @@ def create_default_groups():
     contrib.permissions.clear()
     copyeditor.permissions.clear()
     editor.permissions.clear()
-
-    for perm in BASE_PERMS:
-        contrib.permissions.add(Permission.objects.get(name=perm))
-
-    for perm in COPYEDITOR_PERMS:
-        copyeditor.permissions.add(Permission.objects.get(name=perm))
-
-    for perm in EDITOR_PERMS:
-        editor.permissions.add(Permission.objects.get(name=perm))
 
 
 def role_at_least(role, minimum):
