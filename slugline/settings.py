@@ -104,15 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
             )
         },
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 AUTH_USER_MODEL = "user.SluglineUser"
@@ -158,6 +152,7 @@ REST_FRAMEWORK = {
         "common.renderers.SluglineRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 SWAGGER_SETTINGS = {
