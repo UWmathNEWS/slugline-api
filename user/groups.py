@@ -22,4 +22,4 @@ def create_default_groups():
 
 
 def role_at_least(role, minimum):
-    minimum == role or role in GROUPS.get(minimum, [])
+    return minimum == role or role in GROUPS.get(minimum, [])

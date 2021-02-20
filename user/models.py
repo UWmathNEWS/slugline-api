@@ -41,9 +41,9 @@ class SluglineUser(AbstractUser):
     def role(self, value):
         pass
 
-    def at_least(self, role):
+    def at_least(self, minimum):
         """Returns if a user has at least a given role's privileges"""
-        return self.is_staff or role_at_least(self.role, role)
+        return self.is_staff or role_at_least(self.role, minimum)
 
     class Meta:
         ordering = ["date_joined"]
