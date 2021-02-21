@@ -64,14 +64,14 @@ class IssueArticlesTestCase(ContentTestCase):
         response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["results"][0]["title"], "Article")
+        self.assertEqual(response.data["results"][0]["title"], self.article.title)
 
     def test_contributors_can_read_articles(self):
         self.c.force_authenticate(user=self.contrib)
         response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["results"][0]["title"], "Article")
+        self.assertEqual(response.data["results"][0]["title"], self.article.title)
 
     def test_unauthed_cannot_read_unpublished(self):
         self.c.force_authenticate(user=None)
@@ -86,4 +86,4 @@ class IssueArticlesTestCase(ContentTestCase):
         response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["results"][0]["title"], "Article")
+        self.assertEqual(response.data["results"][0]["title"], self.article.title)
