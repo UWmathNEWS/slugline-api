@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.contrib.auth.models import Group
 from rest_framework.test import APIClient
 
-from content.models import Issue
+from content.models import Article, Issue
 
 from user.groups import create_default_groups, EDITOR_GROUP, CONTRIBUTOR_GROUP
 from user.models import SluglineUser
@@ -24,6 +24,9 @@ class IssueTestCase(TestCase):
 
         self.issue = Issue.objects.create(volume_num=666, issue_code="1")
         self.issue.refresh_from_db()
+
+        self.article = Article.objects.create(title="Article", issue=self.issue)
+        self.article.refresh_from_db()
         self.c = APIClient()
 
     def test_editors_can_edit_issues(self):
@@ -73,19 +76,57 @@ class IssueTestCase(TestCase):
         self.assertEqual(self.issue.volume_num, 666)
         self.assertEqual(self.issue.issue_code, "1")
 
-    def test_unauth_cannot_read_unpublished_issue(self):
+    def test_unauth_cannot_read_issue(self):
         self.c.force_authenticate(user=None)
         response = self.c.get(f"/api/issues/{self.issue.id}/")
 
         self.assertEqual(response.status_code, 403)
 
-    def test_unauth_can_read_published_issue(self):
-        # TODO: Ask Terry, unauthed people can't read published issues?
+
+class IssueArticlesTestCase(TestCase):
+    def setUp(self):
+        create_default_groups()
+        self.editor = SluglineUser.objects.create(username="editor")
+        self.editor.groups.add(Group.objects.get(name=EDITOR_GROUP))
+        self.editor.save()
+        self.editor.refresh_from_db()
+
+        self.contrib = SluglineUser.objects.create(username="contrib")
+        self.contrib.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
+        self.contrib.save()
+
+        self.issue = Issue.objects.create(volume_num=666, issue_code="1")
+        self.issue.refresh_from_db()
+
+        self.article = Article.objects.create(title="Article", issue=self.issue)
+        self.article.refresh_from_db()
+        self.c = APIClient()
+
+    def test_editors_can_read_articles(self):
+        self.c.force_authenticate(user=self.editor)
+        response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"][0]["title"], "Article")
+
+    def test_contributors_can_read_articles(self):
+        self.c.force_authenticate(user=self.contrib)
+        response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"][0]["title"], "Article")
+
+    def test_unauthed_cannot_read_unpublished(self):
+        self.c.force_authenticate(user=None)
+        response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_unauthed_can_read_published(self):
         self.c.force_authenticate(user=None)
         self.issue.publish_date = date.today()
         self.issue.save()
-        response = self.c.get(f"/api/issues/{self.issue.id}/")
+        response = self.c.get(f"/api/issues/{self.issue.id}/articles/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["volume_num"], self.issue.volume_num)
-        self.assertEqual(response.data["issue_code"], self.issue.issue_code)
+        self.assertEqual(response.data["results"][0]["title"], "Article")
