@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.contrib.auth.models import Group
 
@@ -18,15 +20,22 @@ class ContentTestCase(TestCase):
         self.editor = SluglineUser.objects.create(username="editor")
         self.editor.groups.add(Group.objects.get(name=EDITOR_GROUP))
         self.editor.save()
-        self.editor.refresh_from_db()
 
         self.contrib = SluglineUser.objects.create(username="contrib")
         self.contrib.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
         self.contrib.save()
 
-        self.issue = Issue.objects.create(volume_num=666, issue_code="1")
-        self.issue.refresh_from_db()
+        self.unpublished_issue = Issue.objects.create(volume_num=666, issue_code="1")
 
-        self.article = Article.objects.create(title="Article", issue=self.issue)
-        self.article.refresh_from_db()
+        self.published_issue = Issue.objects.create(
+            volume_num=667, issue_code="1", publish_date=date.today()
+        )
+
+        self.unpublished_article = Article.objects.create(
+            title="Unpublished Article", issue=self.unpublished_issue
+        )
+
+        self.published_article = Article.objects.create(
+            title="Published Article", issue=self.published_issue
+        )
         self.c = APIClient()
