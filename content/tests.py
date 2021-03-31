@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from content.models import Article, Issue
 from user.groups import (
+    COPYEDITOR_GROUP,
     create_default_groups,
     EDITOR_GROUP,
     CONTRIBUTOR_GROUP,
@@ -20,6 +21,10 @@ class ContentTestCase(TestCase):
         self.editor = SluglineUser.objects.create(username="editor")
         self.editor.groups.add(Group.objects.get(name=EDITOR_GROUP))
         self.editor.save()
+
+        self.copyeditor = SluglineUser.objects.create(username="copyeditor")
+        self.copyeditor.groups.add(Group.objects.get(name=COPYEDITOR_GROUP))
+        self.copyeditor.save()
 
         self.contrib = SluglineUser.objects.create(username="contrib")
         self.contrib.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
