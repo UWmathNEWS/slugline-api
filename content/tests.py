@@ -1,53 +1,46 @@
-from django.test import TestCase
-
-from common.search_parser import SearchParser
 from datetime import date
 
-# Create your tests here.
+from django.test import TestCase
+from django.contrib.auth.models import Group
+
+from rest_framework.test import APIClient
+
+from content.models import Article, Issue
+from user.groups import (
+    COPYEDITOR_GROUP,
+    create_default_groups,
+    EDITOR_GROUP,
+    CONTRIBUTOR_GROUP,
+)
+from user.models import SluglineUser
 
 
-class SearchParserTestCase(TestCase):
-    def setUp(self):
-        self.tests = [
-            ("hello world", (["hello", "world"], {})),
-            ('"hello world"', (["hello world"], {})),
-            ("hello world is:me", (["hello", "world"], {"is": [":", "me"]})),
-            (
-                "hello role:Editor world",
-                (["hello", "world"], {"role": [":", "Editor"]}),
-            ),
-            (
-                """hello title_strict="Malice in the Palice" world""",
-                (["hello", "world"], {"title_strict": ["=", "Malice in the Palice"]}),
-            ),
-            (
-                u"""hello title:"Malice\\" in the \U0001F600Palice" world is:false""",
-                (
-                    ["hello", "world"],
-                    {
-                        "title": [":", u'Malice" in the \U0001F600Palice'],
-                        "is": [":", "false"],
-                    },
-                ),
-            ),
-            ("is:true", ([], {"is": [":", "true"]})),
-            ("me:''", ([], {"me": [":", ""]})),
-            ("shiver 'me:' timbers", (["shiver", "me:", "timbers"], {})),
-            (u"    \U0001F603    ", ([u"\U0001F603"], {})),
-            ("''", ([""], {})),
-            (
-                "query (2020-01-01,2020-06-01)",
-                (["query", "(2020-01-01,2020-06-01)"], {}),
-            ),
-            (
-                "date:(2020-01-01,2020-06-01)",
-                ([], {"date": [date(2020, 1, 1), date(2020, 6, 1)]}),
-            ),
-            ("date:(,2020-06-01)", ([], {"date": [",", date(2020, 6, 1)]})),
-            ("date:(2020-01-01,)", ([], {"date": [date(2020, 1, 1), ","]})),
-        ]
-        self.parser = SearchParser()
+class ContentTestCase(TestCase):
+    def setUp(self) -> None:
+        create_default_groups()
+        self.editor = SluglineUser.objects.create(username="editor")
+        self.editor.groups.add(Group.objects.get(name=EDITOR_GROUP))
+        self.editor.save()
 
-    def test_things(self):
-        for test in self.tests:
-            self.assertEqual(self.parser.parse_query(test[0]), test[1])
+        self.copyeditor = SluglineUser.objects.create(username="copyeditor")
+        self.copyeditor.groups.add(Group.objects.get(name=COPYEDITOR_GROUP))
+        self.copyeditor.save()
+
+        self.contrib = SluglineUser.objects.create(username="contrib")
+        self.contrib.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
+        self.contrib.save()
+
+        self.unpublished_issue = Issue.objects.create(volume_num=666, issue_code="1")
+
+        self.published_issue = Issue.objects.create(
+            volume_num=667, issue_code="1", publish_date=date.today()
+        )
+
+        self.unpublished_article = Article.objects.create(
+            title="Unpublished Article", issue=self.unpublished_issue
+        )
+
+        self.published_article = Article.objects.create(
+            title="Published Article", issue=self.published_issue
+        )
+        self.c = APIClient()

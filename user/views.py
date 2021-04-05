@@ -17,6 +17,7 @@ from rest_framework.viewsets import ModelViewSet
 from common.filters import SearchableFilterBackend
 from common.permissions import IsEditor
 from user.models import SluglineUser, UserSerializer, FORBIDDEN_USERNAMES
+from user.groups import EDITOR_GROUP, CONTRIBUTOR_GROUP, COPYEDITOR_GROUP
 
 from math import ceil
 from secrets import token_hex
@@ -99,7 +100,7 @@ def current_user_view(request):
         else:
             if (
                 not request.user.is_staff
-                and not request.user.at_least("Editor")
+                and not request.user.at_least(EDITOR_GROUP)
                 and any(["role" in request.data])
             ):
                 raise APIException("USER.INSUFFICIENT_PRIVILEGES")
@@ -159,19 +160,19 @@ def transform_role(query):
     if query == "staff":
         return Q(is_staff=True)
     elif query == "editor":
-        return Q(is_staff=False) & Q(groups__name__in=["Editor"])
+        return Q(is_staff=False) & Q(groups__name__in=[EDITOR_GROUP])
     elif query == "copyeditor":
         return (
             Q(is_staff=False)
-            & ~Q(groups__name__in=["Editor"])
-            & Q(groups__name__in=["Copyeditor"])
+            & ~Q(groups__name__in=[EDITOR_GROUP])
+            & Q(groups__name__in=[COPYEDITOR_GROUP])
         )
     elif query == "contributor":
         return (
             Q(is_staff=False)
-            & ~Q(groups__name__in=["Editor"])
-            & ~Q(groups__name__in=["Copyeditor"])
-            & Q(groups__name__in=["Contributor"])
+            & ~Q(groups__name__in=[EDITOR_GROUP])
+            & ~Q(groups__name__in=[COPYEDITOR_GROUP])
+            & Q(groups__name__in=[CONTRIBUTOR_GROUP])
         )
     else:
         # return an empty queryset
@@ -197,7 +198,7 @@ class UserViewSet(ModelViewSet):
         # max username length; https://docs.djangoproject.com/en/3.0/ref/contrib/auth/
         if len(request.data["username"]) > 150:
             raise APIException({"username": ["USER.USERNAME.TOO_LONG"]})
-        if request.data["role"] != "Contributor":
+        if request.data["role"] != CONTRIBUTOR_GROUP:
             confirm_password(request)
         serializer = UserSerializer(data=request.data)
         serializer.is_valid()
@@ -230,7 +231,7 @@ class UserViewSet(ModelViewSet):
             if request.user.username == kwargs.get(
                 "username", ""
             ) or SluglineUser.objects.get(username=kwargs.get("username", "")).at_least(
-                "Editor"
+                EDITOR_GROUP
             ):
                 raise Exception
             return Response(super().destroy(request, *args, **kwargs).data)

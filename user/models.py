@@ -7,12 +7,14 @@ from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
 
+from user.groups import (
+    GROUPS,
+    EDITOR_GROUP,
+    COPYEDITOR_GROUP,
+    CONTRIBUTOR_GROUP,
+    role_at_least,
+)
 
-GROUPS = {
-    "Contributor": [],
-    "Copyeditor": ["Contributor"],
-    "Editor": ["Copyeditor", "Contributor"],
-}
 FORBIDDEN_USERNAMES = {"admin", "administrator", "root", "toor", "sudo", "sudoers"}
 
 
@@ -26,12 +28,12 @@ class SluglineUser(AbstractUser):
     @property
     def role(self):
         """Returns the highest role that a user has."""
-        if self.groups.filter(name="Editor").exists():
-            return "Editor"
-        elif self.groups.filter(name="Copyeditor").exists():
-            return "Copyeditor"
+        if self.groups.filter(name=EDITOR_GROUP).exists():
+            return EDITOR_GROUP
+        elif self.groups.filter(name=COPYEDITOR_GROUP).exists():
+            return COPYEDITOR_GROUP
         else:
-            return "Contributor"
+            return CONTRIBUTOR_GROUP
 
     # We write a setter as we construct temporary users when doing password validation, and sometimes role information
     # is part of the data.
@@ -39,16 +41,16 @@ class SluglineUser(AbstractUser):
     def role(self, value):
         pass
 
-    def at_least(self, role):
+    def at_least(self, minimum):
         """Returns if a user has at least a given role's privileges"""
-        return self.is_staff or role == self.role or role in GROUPS.get(self.role, [])
+        return self.is_staff or role_at_least(self.role, minimum)
 
     class Meta:
         ordering = ["date_joined"]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(default="Contributor")
+    role = serializers.CharField(default=CONTRIBUTOR_GROUP)
 
     def create(self, validated_data):
         if (
@@ -64,7 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
 
-        user.groups.add(Group.objects.get(name="Contributor"))
+        user.groups.add(Group.objects.get(name=CONTRIBUTOR_GROUP))
 
         if validated_data["role"] in GROUPS:
             for base_role in GROUPS[validated_data["role"]]:
