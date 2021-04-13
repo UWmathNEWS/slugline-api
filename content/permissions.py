@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 from user.models import SluglineUser
+from user.groups import EDITOR_GROUP, CONTRIBUTOR_GROUP, COPYEDITOR_GROUP
 
 
 class IsPublishedOrIsAuthenticated(permissions.BasePermission):
@@ -22,7 +23,7 @@ class IsCopyeditorOrAboveOrReadOnly(IsPublishedOrIsAuthenticated):
             return True
         else:
             return isinstance(request.user, SluglineUser) and request.user.at_least(
-                "Copyeditor"
+                COPYEDITOR_GROUP
             )
 
 
@@ -32,7 +33,7 @@ class IsEditorOrReadOnly(IsPublishedOrIsAuthenticated):
             return True
         else:
             return isinstance(request.user, SluglineUser) and request.user.at_least(
-                "Editor"
+                EDITOR_GROUP
             )
 
 
@@ -42,5 +43,5 @@ class IsEditorOrIsAuthenticatedReadOnly(IsPublishedOrIsAuthenticated):
             return request.user.is_authenticated
         else:
             return isinstance(request.user, SluglineUser) and request.user.at_least(
-                "Editor"
+                EDITOR_GROUP
             )

@@ -1,4 +1,5 @@
 import re
+from user.groups import COPYEDITOR_GROUP
 
 from django.db.models import Q
 from django.utils.decorators import method_decorator  # for deprecation
@@ -99,7 +100,8 @@ class ArticleViewSet(ModelViewSet, RetrieveWithDetailModelMixin):
                 return super().has_object_permission(request, view, article)
             else:
                 return isinstance(request.user, SluglineUser) and (
-                    article.user == request.user or request.user.at_least("Copyeditor")
+                    article.user == request.user
+                    or request.user.at_least(COPYEDITOR_GROUP)
                 )
 
     queryset = Article.objects.all()

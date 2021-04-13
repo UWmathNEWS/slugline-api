@@ -158,6 +158,7 @@ REST_FRAMEWORK = {
         "common.renderers.SluglineRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 SWAGGER_SETTINGS = {
