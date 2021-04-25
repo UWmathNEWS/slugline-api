@@ -35,12 +35,34 @@ def create_permission(read_perm, write_perm):
     return NewPermission
 
 
-class IsContributorOrAbove(BasePermission):
+class SluglinePermission(BasePermission):
+    """
+    A BasePermission that implements has_object_permission properly.
+
+    DRF's version just returns True by default, which creates problems when we compose
+    a regular permission and an object permission.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
+
+
+class IsAuthenticated(SluglinePermission):
+    """
+    A copy of DRF's IsAuthenticated that, by virtue of inheriting from SluglinePermission,
+    handles has_object_permission properly.
+    """
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)
+
+
+class IsContributorOrAbove(SluglinePermission):
     def has_permission(self, request, view):
         return bool(isinstance(request.user, SluglineUser) or request.user.is_staff)
 
 
-class IsCopyeditorOrAbove(BasePermission):
+class IsCopyeditorOrAbove(SluglinePermission):
     def has_permission(self, request, view):
         return bool(
             isinstance(request.user, SluglineUser)
@@ -48,7 +70,7 @@ class IsCopyeditorOrAbove(BasePermission):
         )
 
 
-class IsEditorOrAbove(BasePermission):
+class IsEditorOrAbove(SluglinePermission):
     def has_permission(self, request, view):
         return bool(
             isinstance(request.user, SluglineUser)
