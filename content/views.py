@@ -18,9 +18,9 @@ from content.serializers import (
     ArticleContentSerializer,
 )
 from common.permissions import (
+    create_permission,
     IsCopyeditorOrAbove,
     IsEditor,
-    create_permission,
     IsAuthenticated,
 )
 from content.permissions import (
