@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 from common.filters import SearchableFilterBackend
 from common.pagination import SluglinePagination
@@ -18,11 +17,16 @@ from content.serializers import (
     ArticleSerializer,
     ArticleContentSerializer,
 )
-from content.permissions import (
-    IsPublishedOrIsAuthenticated,
-    IsEditorOrIsAuthenticatedReadOnly,
+from common.permissions import (
+    create_permission,
+    IsCopyeditorOrAbove,
+    IsEditor,
+    IsAuthenticated,
 )
-from user.models import SluglineUser
+from content.permissions import (
+    IsArticleOwner,
+    IsArticlePublished,
+)
 
 
 def transform_issue_name(term):
@@ -48,7 +52,9 @@ class IssueViewSet(ModelViewSet):
 
     __articles_filter = SearchableFilterBackend(["title", "content_raw"])
 
-    permission_classes = [IsEditorOrIsAuthenticatedReadOnly]
+    permission_classes = [
+        create_permission(read_perm=IsAuthenticated, write_perm=IsEditor)
+    ]
 
     @action(detail=False, methods=["GET"])
     def latest(self, request):
@@ -91,19 +97,14 @@ class PublishedIssueViewSet(ReadOnlyModelViewSet):
 
 
 class ArticleViewSet(ModelViewSet):
-    class ArticlePermissions(IsPublishedOrIsAuthenticated):
-        def has_object_permission(self, request, view, article):
-            if request.method in SAFE_METHODS:
-                return super().has_object_permission(request, view, article)
-            else:
-                return isinstance(request.user, SluglineUser) and (
-                    article.user == request.user
-                    or request.user.at_least(COPYEDITOR_GROUP)
-                )
-
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    permission_classes = [ArticlePermissions]
+    permission_classes = [
+        create_permission(
+            read_perm=IsArticlePublished | IsAuthenticated,
+            write_perm=IsArticleOwner | IsCopyeditorOrAbove,
+        )
+    ]
     filter_backends = [SearchableFilterBackend]
     search_fields = ["title", "content_raw"]
     search_transformers = {"is": "status"}
@@ -132,10 +133,10 @@ class UserArticleViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
 class ArticleContentViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
     queryset = Article.objects.all()
     serializer_class = ArticleContentSerializer
-    permission_classes = [IsPublishedOrIsAuthenticated]
+    permission_classes = [IsArticlePublished | IsAuthenticated]
 
 
 class ArticleHTMLViewSet(GenericViewSet, RetrieveModelMixin):
     queryset = Article.objects.all()
     serializer_class = ArticleContentSerializer
-    permission_classes = [IsPublishedOrIsAuthenticated]
+    permission_classes = [IsArticlePublished | IsAuthenticated]
